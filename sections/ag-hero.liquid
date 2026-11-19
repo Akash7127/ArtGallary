@@ -1,0 +1,173 @@
+{% comment %}
+  Split hero: statement on one side, a featured artwork on the other,
+  with a small caption card describing the work.
+{% endcomment %}
+
+<section class="ag-hero full-width" style="--hero-ratio: {{ section.settings.image_ratio }}">
+  <div class="ag-hero__inner">
+    <div class="ag-hero__copy">
+      {% if section.settings.eyebrow != blank %}
+        <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+      {% endif %}
+      <h1 class="ag-hero__title">{{ section.settings.heading }}</h1>
+      {% if section.settings.text != blank %}
+        <div class="ag-hero__text">{{ section.settings.text }}</div>
+      {% endif %}
+      <div class="ag-hero__actions">
+        {% if section.settings.button_label != blank %}
+          <a class="ag-btn" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">
+            {{- section.settings.button_label -}}
+          </a>
+        {% endif %}
+        {% if section.settings.button_2_label != blank %}
+          <a class="ag-btn ag-btn--outline" href="{{ section.settings.button_2_link | default: routes.root_url }}">
+            {{- section.settings.button_2_label -}}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <figure class="ag-hero__figure">
+      <div class="ag-media ag-hero__media">
+        {% if section.settings.image %}
+          {{
+            section.settings.image
+            | image_url: width: 1800
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              sizes: '(min-width: 900px) 55vw, 100vw',
+              widths: '600, 900, 1200, 1500, 1800'
+          }}
+        {% else %}
+          {{ 'lifestyle-1' | placeholder_svg_tag }}
+        {% endif %}
+      </div>
+      {% if section.settings.caption_title != blank %}
+        <figcaption class="ag-hero__caption">
+          <span class="ag-hero__caption-label">{{ section.settings.caption_label }}</span>
+          <strong>{{ section.settings.caption_title }}</strong>
+          <span>{{ section.settings.caption_meta }}</span>
+        </figcaption>
+      {% endif %}
+    </figure>
+  </div>
+</section>
+
+{% stylesheet %}
+  .ag-hero {
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3.5rem, 8vw, 6.5rem);
+  }
+  .ag-hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 6rem);
+    width: var(--content-width);
+    margin-inline: auto;
+  }
+  .ag-hero__title {
+    margin-top: 1.5rem;
+    font-size: clamp(2.75rem, 6.5vw, 5.75rem);
+    line-height: 1.02;
+  }
+  .ag-hero__title em {
+    color: var(--color-accent);
+  }
+  .ag-hero__text {
+    max-width: 34rem;
+    margin-top: 1.75rem;
+    font-size: 1.05rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+  .ag-hero__figure {
+    position: relative;
+    margin: 0;
+  }
+  .ag-hero__media {
+    aspect-ratio: var(--hero-ratio);
+    border-radius: 0 0 0 clamp(4rem, 12vw, 10rem);
+  }
+  .ag-hero__caption {
+    position: absolute;
+    right: clamp(-1rem, -2vw, 0rem);
+    bottom: clamp(1rem, 4vw, 2.5rem);
+    display: grid;
+    gap: 0.15rem;
+    max-width: 17rem;
+    padding: 1.1rem 1.4rem;
+    background: var(--color-background);
+    box-shadow: 0 20px 40px -24px rgb(0 0 0 / 0.35);
+    font-size: 0.85rem;
+  }
+  .ag-hero__caption strong {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 1.15rem;
+  }
+  .ag-hero__caption span {
+    color: var(--color-foreground-muted);
+  }
+  .ag-hero__caption .ag-hero__caption-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  @media (max-width: 900px) {
+    .ag-hero__inner {
+      grid-template-columns: 1fr;
+    }
+    .ag-hero__figure {
+      order: -1;
+    }
+    .ag-hero__caption {
+      right: 0.75rem;
+      bottom: 0.75rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Gallery hero",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Contemporary art gallery" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Art that stays with you" },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Original paintings, sculpture and works on paper by emerging and established artists, chosen by our curators and shipped with care.</p>"
+    },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Explore artworks" },
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    { "type": "text", "id": "button_2_label", "label": "Second button label", "default": "Meet the artists" },
+    { "type": "url", "id": "button_2_link", "label": "Second button link" },
+    { "type": "image_picker", "id": "image", "label": "Featured artwork" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image shape",
+      "options": [
+        { "value": "4 / 5", "label": "Portrait" },
+        { "value": "1 / 1", "label": "Square" },
+        { "value": "5 / 4", "label": "Landscape" }
+      ],
+      "default": "4 / 5"
+    },
+    { "type": "header", "content": "Caption card" },
+    { "type": "text", "id": "caption_label", "label": "Caption label", "default": "Featured work" },
+    { "type": "text", "id": "caption_title", "label": "Artwork title", "default": "Untitled (Monsoon)" },
+    { "type": "text", "id": "caption_meta", "label": "Artist and medium", "default": "Acrylic on canvas, 2026" }
+  ],
+  "presets": [{ "name": "Gallery hero" }]
+}
+{% endschema %}

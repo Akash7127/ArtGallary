@@ -1,0 +1,141 @@
+{% comment %}
+  Featured artworks from a collection. Uses an uneven (masonry-like)
+  grid so it feels like a hang rather than a shop shelf.
+  The product vendor is shown as the artist name.
+{% endcomment %}
+
+{% assign collection = section.settings.collection %}
+
+<section class="ag-artworks ag-section">
+  <div class="ag-section-head">
+    <div>
+      <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+      <h2>{{ section.settings.heading }}</h2>
+    </div>
+    <a class="ag-link" href="{{ collection.url | default: routes.all_products_collection_url }}">
+      {{- section.settings.link_label }} &rarr;
+    </a>
+  </div>
+
+  <ul class="ag-artworks__grid" role="list">
+    {% if collection != blank and collection.products_count > 0 %}
+      {% for product in collection.products limit: section.settings.limit %}
+        <li class="ag-art">
+          <a class="ag-art__link" href="{{ product.url }}">
+            <div class="ag-media ag-art__media">
+              {% if product.featured_image %}
+                {{
+                  product.featured_image
+                  | image_url: width: 900
+                  | image_tag: loading: 'lazy', sizes: '(min-width: 900px) 25vw, 50vw', alt: product.featured_image.alt
+                }}
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag }}
+              {% endif %}
+              {% unless product.available %}
+                <span class="ag-art__badge">{{ 'artworks.sold' | t }}</span>
+              {% endunless %}
+            </div>
+            <div class="ag-art__info">
+              <h3 class="ag-art__title">{{ product.title | escape }}</h3>
+              {% if product.vendor != blank %}
+                <p class="ag-art__artist">{{ product.vendor }}</p>
+              {% endif %}
+              <p class="ag-art__price">
+                {% if product.available %}{{ product.price | money }}{% else %}{{ 'artworks.sold' | t }}{% endif %}
+              </p>
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    {% else %}
+      {% for i in (1..section.settings.limit) %}
+        {% assign placeholder = 'product-' | append: i %}
+        <li class="ag-art">
+          <div class="ag-art__link">
+            <div class="ag-media ag-art__media">{{ placeholder | placeholder_svg_tag }}</div>
+            <div class="ag-art__info">
+              <h3 class="ag-art__title">{{ 'artworks.placeholder_title' | t }}</h3>
+              <p class="ag-art__artist">{{ 'artworks.placeholder_artist' | t }}</p>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    {% endif %}
+  </ul>
+</section>
+
+{% stylesheet %}
+  .ag-artworks__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(2rem, 4vw, 3rem) clamp(1rem, 2.5vw, 2rem);
+    padding: 0;
+    list-style: none;
+  }
+  .ag-art__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .ag-art__media {
+    aspect-ratio: 4 / 5;
+  }
+  .ag-art:nth-child(4n + 2) .ag-art__media {
+    aspect-ratio: 1 / 1;
+  }
+  .ag-art:nth-child(4n + 3) .ag-art__media {
+    aspect-ratio: 3 / 4;
+  }
+  .ag-art:nth-child(even) {
+    margin-top: clamp(0rem, 4vw, 3.5rem);
+  }
+  .ag-art__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--color-background);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ag-art__info {
+    padding-top: 1rem;
+  }
+  .ag-art__title {
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+  .ag-art__artist {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-art__price {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 900px) {
+    .ag-artworks__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Featured artworks",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Collect" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New to the collection" },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "limit", "min": 4, "max": 12, "step": 4, "label": "Number of artworks", "default": 8 },
+    { "type": "text", "id": "link_label", "label": "Link label", "default": "View all artworks" }
+  ],
+  "presets": [{ "name": "Featured artworks" }]
+}
+{% endschema %}

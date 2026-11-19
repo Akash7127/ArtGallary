@@ -1,0 +1,118 @@
+{% comment %}
+  Newsletter sign-up. Uses Shopify's customer form, so subscribers
+  appear in the admin under Customers with email marketing accepted.
+{% endcomment %}
+
+<section class="ag-newsletter ag-section ag-section--surface full-width">
+  <div class="ag-newsletter__inner">
+    <div>
+      <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+      <h2 class="ag-newsletter__heading">{{ section.settings.heading }}</h2>
+      <div class="ag-newsletter__text">{{ section.settings.text }}</div>
+    </div>
+
+    {% form 'customer', id: 'NewsletterForm', class: 'ag-newsletter__form' %}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      {% if form.posted_successfully? %}
+        <p class="ag-newsletter__message" role="status">{{ 'newsletter.success' | t }}</p>
+      {% else %}
+        <div class="ag-newsletter__field">
+          <label class="visually-hidden" for="NewsletterEmail">{{ 'newsletter.email' | t }}</label>
+          <input
+            id="NewsletterEmail"
+            type="email"
+            name="contact[email]"
+            autocomplete="email"
+            placeholder="{{ 'newsletter.email' | t }}"
+            required
+            {% if form.errors %}
+              aria-invalid="true" aria-describedby="NewsletterError"
+            {% endif %}
+          >
+          <button class="ag-btn" type="submit">{{ 'newsletter.subscribe' | t }}</button>
+        </div>
+        {% if form.errors %}
+          <p id="NewsletterError" class="ag-newsletter__error">{{ form.errors.translated_fields.email }} {{ form.errors.messages.email }}</p>
+        {% endif %}
+      {% endif %}
+    {% endform %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .ag-newsletter__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 2.5rem clamp(2rem, 6vw, 6rem);
+    width: var(--content-width);
+    margin-inline: auto;
+  }
+  .ag-newsletter__heading {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+  }
+  .ag-newsletter__text {
+    max-width: 30rem;
+    margin-top: 1rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-newsletter__field {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    border: 1px solid var(--color-foreground);
+    border-radius: 999px;
+    background: var(--color-background);
+  }
+  .ag-newsletter__field input {
+    flex: 1;
+    min-width: 0;
+    min-height: 3rem;
+    padding-inline: 1.25rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+  .ag-newsletter__field input:focus {
+    outline: none;
+  }
+  .ag-newsletter__field:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .ag-newsletter__message,
+  .ag-newsletter__error {
+    margin-top: 0.75rem;
+  }
+  .ag-newsletter__error {
+    color: var(--color-accent);
+  }
+  @media (max-width: 750px) {
+    .ag-newsletter__inner {
+      grid-template-columns: 1fr;
+    }
+    .ag-newsletter__field {
+      flex-direction: column;
+      border-radius: 1.5rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Stay close" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Openings, new work and studio notes" },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>One thoughtful email a month. Be first to see new works before they go online.</p>"
+    }
+  ],
+  "presets": [{ "name": "Newsletter" }]
+}
+{% endschema %}

@@ -48,5 +48,25 @@
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
     "results_for_html": "{{ count }} results found for {{ terms }}"
+  },
+  "header": {
+    "menu": "Menu",
+    "account": "Account"
+  },
+  "exhibitions": {
+    "view": "View exhibition"
+  },
+  "artworks": {
+    "sold": "Sold",
+    "placeholder_title": "Artwork title",
+    "placeholder_artist": "Artist name"
+  },
+  "newsletter": {
+    "email": "Your email address",
+    "subscribe": "Subscribe",
+    "success": "Thank you. You are on the list."
+  },
+  "footer": {
+    "contact": "Contact"
   }
 }

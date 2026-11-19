@@ -9,12 +9,147 @@
  */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
+    "hero": {
+      "type": "ag-hero",
+      "settings": {
+        "eyebrow": "Contemporary art gallery",
+        "heading": "Art that stays with you",
+        "text": "<p>Original paintings, sculpture and works on paper by emerging and established artists, chosen by our curators and shipped with care.</p>",
+        "button_label": "Explore artworks",
+        "button_2_label": "Meet the artists",
+        "image_ratio": "4 / 5",
+        "caption_label": "Featured work",
+        "caption_title": "Untitled (Monsoon)",
+        "caption_meta": "Acrylic on canvas, 2026"
+      }
+    },
+    "statement": {
+      "type": "ag-statement",
+      "blocks": {
+        "fact_1": { "type": "fact", "settings": { "value": "2010", "label": "Gallery founded" } },
+        "fact_2": { "type": "fact", "settings": { "value": "60+", "label": "Represented artists" } },
+        "fact_3": { "type": "fact", "settings": { "value": "120", "label": "Exhibitions held" } },
+        "fact_4": { "type": "fact", "settings": { "value": "30", "label": "Countries shipped to" } }
+      },
+      "block_order": ["fact_1", "fact_2", "fact_3", "fact_4"],
+      "settings": {
+        "eyebrow": "About the gallery",
+        "lead": "We bring together artists who work slowly and look closely, and we help collectors live with work they truly love.",
+        "text": "<p>Our programme moves between painting, sculpture, textile and photography. Alongside exhibitions, we offer art advisory, commissions for homes and workplaces, and framing done by hand in our own studio.</p>",
+        "link_label": "Our story"
+      }
+    },
+    "exhibitions": {
+      "type": "ag-exhibitions",
+      "blocks": {
+        "show_1": {
+          "type": "exhibition",
+          "settings": {
+            "status": "Now showing",
+            "location": "Main gallery",
+            "title": "Quiet Harvest",
+            "artists": "A solo exhibition of new paintings",
+            "dates": "20 Nov 2026 – 10 Jan 2027",
+            "text": "<p>Fields, kitchens and courtyards painted from memory. Built up in thin layers over many months, these canvases look at the small rituals of rural life and the light that falls across them.</p>"
+          }
+        },
+        "show_2": {
+          "type": "exhibition",
+          "settings": {
+            "status": "Coming soon",
+            "location": "Project room",
+            "title": "Thread and Ground",
+            "artists": "Group exhibition · textile and sculpture",
+            "dates": "18 Jan – 28 Feb 2027"
+          }
+        },
+        "show_3": {
+          "type": "exhibition",
+          "settings": {
+            "status": "Online",
+            "location": "Viewing room",
+            "title": "Paper Weather",
+            "artists": "Works on paper by six artists",
+            "dates": "Open now"
+          }
+        }
+      },
+      "block_order": ["show_1", "show_2", "show_3"],
+      "settings": {
+        "eyebrow": "On view",
+        "heading": "Exhibitions",
+        "link_label": "All exhibitions"
+      }
+    },
+    "artworks": {
+      "type": "ag-artworks",
+      "settings": {
+        "eyebrow": "Collect",
+        "heading": "New to the collection",
+        "collection": "",
+        "limit": 8,
+        "link_label": "View all artworks"
+      }
+    },
+    "artists": {
+      "type": "ag-artists",
+      "blocks": {
+        "artist_1": { "type": "artist", "settings": { "name": "Artist One", "practice": "Painting" } },
+        "artist_2": { "type": "artist", "settings": { "name": "Artist Two", "practice": "Sculpture" } },
+        "artist_3": { "type": "artist", "settings": { "name": "Artist Three", "practice": "Works on paper" } },
+        "artist_4": { "type": "artist", "settings": { "name": "Artist Four", "practice": "Textile" } },
+        "artist_5": { "type": "artist", "settings": { "name": "Artist Five", "practice": "Photography" } },
+        "artist_6": { "type": "artist", "settings": { "name": "Artist Six", "practice": "Mixed media" } }
+      },
+      "block_order": ["artist_1", "artist_2", "artist_3", "artist_4", "artist_5", "artist_6"],
+      "settings": {
+        "eyebrow": "Represented artists",
+        "heading": "The artists",
+        "link_label": "All artists"
+      }
+    },
+    "services": {
+      "type": "ag-services",
+      "blocks": {
+        "service_1": {
+          "type": "service",
+          "settings": {
+            "title": "Art advisory",
+            "text": "<p>Tell us about your space and taste. We shortlist works, arrange viewings and help you build a collection over time.</p>",
+            "link_label": "Book a consultation"
+          }
+        },
+        "service_2": {
+          "type": "service",
+          "settings": {
+            "title": "Commissions",
+            "text": "<p>Site-specific pieces for homes, hotels and offices, made by our artists to your brief, size and timeline.</p>",
+            "link_label": "Start a commission"
+          }
+        },
+        "service_3": {
+          "type": "service",
+          "settings": {
+            "title": "Framing and shipping",
+            "text": "<p>Museum-grade framing in our studio, and insured, crated delivery to your door anywhere in the world.</p>",
+            "link_label": "Learn more"
+          }
+        }
+      },
+      "block_order": ["service_1", "service_2", "service_3"],
+      "settings": {
+        "eyebrow": "Beyond the walls",
+        "heading": "How we can help"
+      }
+    },
+    "newsletter": {
+      "type": "ag-newsletter",
+      "settings": {
+        "eyebrow": "Stay close",
+        "heading": "Openings, new work and studio notes",
+        "text": "<p>One thoughtful email a month. Be first to see new works before they go online.</p>"
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["hero", "statement", "exhibitions", "artworks", "artists", "services", "newsletter"]
 }
