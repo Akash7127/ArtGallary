@@ -1,0 +1,303 @@
+{% comment %}
+  Account sign-in page (classic customer accounts): artwork on one side,
+  sign-in form on the other, with a "forgot password" form that swaps in
+  without JavaScript (uses the #recover address).
+
+  Only used when the store has classic customer accounts turned on.
+  With Shopify's newer customer accounts, sign-in is hosted by Shopify.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-login
+{% endcomment %}
+
+<div class="ag-auth full-width">
+  <div class="ag-auth__art ag-media">
+    {% if section.settings.image %}
+      {{
+        section.settings.image
+        | image_url: width: 1600
+        | image_tag: loading: 'eager', sizes: '(min-width: 900px) 50vw, 100vw', alt: ''
+      }}
+    {% else %}
+      {{ 'lifestyle-2' | placeholder_svg_tag }}
+    {% endif %}
+    {% if section.settings.quote != blank %}
+      <blockquote class="ag-auth__quote ag-display">{{ section.settings.quote }}</blockquote>
+    {% endif %}
+  </div>
+
+  <div class="ag-auth__panel">
+    {%- comment -%} Recover password {%- endcomment -%}
+    <div id="recover" class="ag-auth__recover" tabindex="-1">
+      <span class="ag-eyebrow">{{ 'customers.recover.eyebrow' | t }}</span>
+      <h1 class="ag-auth__title">{{ 'customers.recover.title' | t }}</h1>
+      <p class="ag-auth__lead">{{ 'customers.recover.text' | t }}</p>
+
+      {% form 'recover_customer_password', class: 'ag-auth__form' %}
+        {% assign recover_success = form.posted_successfully? %}
+        {% if form.errors %}
+          {% comment %} Keep the reset form open after a failed attempt {% endcomment %}
+          <style>
+            .ag-auth__recover { display: block; }
+            .ag-auth__login { display: none; }
+          </style>
+          <div class="ag-form-errors" role="alert">{{ form.errors | default_errors }}</div>
+        {% endif %}
+        <div class="ag-field">
+          <label for="RecoverEmail">{{ 'customers.login.email' | t }}</label>
+          <input
+            type="email"
+            id="RecoverEmail"
+            name="email"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            required
+          >
+        </div>
+        <button type="submit" class="ag-btn">{{ 'customers.recover.submit' | t }}</button>
+        <a class="ag-auth__switch" href="#login">&larr; {{ 'customers.recover.cancel' | t }}</a>
+      {% endform %}
+    </div>
+
+    {%- comment -%} Sign in {%- endcomment -%}
+    <div id="login" class="ag-auth__login">
+      <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+      <h1 class="ag-auth__title">{{ 'customers.login.title' | t }}</h1>
+      {% if section.settings.intro != blank %}
+        <div class="ag-auth__lead">{{ section.settings.intro }}</div>
+      {% endif %}
+
+      {% if recover_success %}
+        <p class="ag-auth__notice" role="status">{{ 'customers.recover.success' | t }}</p>
+      {% endif %}
+
+      {% form 'customer_login', novalidate: 'novalidate', class: 'ag-auth__form' %}
+        {% if form.errors %}
+          <div class="ag-form-errors" role="alert">{{ form.errors | default_errors }}</div>
+        {% endif %}
+        <div class="ag-field">
+          <label for="LoginEmail">{{ 'customers.login.email' | t }}</label>
+          <input
+            type="email"
+            id="LoginEmail"
+            name="customer[email]"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            required
+            {% if form.errors contains 'form' %}
+              aria-invalid="true"
+            {% endif %}
+          >
+        </div>
+        {% if form.password_needed %}
+          <div class="ag-field">
+            <div class="ag-auth__label-row">
+              <label for="LoginPassword">{{ 'customers.login.password' | t }}</label>
+              <a href="#recover">{{ 'customers.login.forgot' | t }}</a>
+            </div>
+            <input
+              type="password"
+              id="LoginPassword"
+              name="customer[password]"
+              autocomplete="current-password"
+              required
+              {% if form.errors contains 'form' %}
+                aria-invalid="true"
+              {% endif %}
+            >
+          </div>
+        {% endif %}
+        <button type="submit" class="ag-btn">{{ 'customers.login.submit' | t }}</button>
+      {% endform %}
+
+      <div class="ag-auth__alt">
+        <p>{{ 'customers.login.new_here' | t }}</p>
+        <a class="ag-btn ag-btn--outline" href="{{ routes.account_register_url }}">{{ 'customers.login.create' | t }}</a>
+      </div>
+
+      {% if shop.checkout.guest_login %}
+        <div class="ag-auth__alt">
+          <p>{{ 'customers.login.guest_text' | t }}</p>
+          {% form 'guest_login' %}
+            <button type="submit" class="ag-link ag-auth__guest">{{ 'customers.login.guest' | t }} &rarr;</button>
+          {% endform %}
+        </div>
+      {% endif %}
+
+      {% if section.settings.benefits != blank %}
+        <div class="ag-auth__benefits ag-rte">{{ section.settings.benefits }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .ag-auth {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: calc(100svh - 4.75rem);
+  }
+  .ag-auth__art {
+    position: relative;
+    min-height: 18rem;
+  }
+  .ag-auth__art img,
+  .ag-auth__art svg {
+    position: absolute;
+    inset: 0;
+  }
+  .ag-auth__quote {
+    position: absolute;
+    left: clamp(1.25rem, 4vw, 3rem);
+    right: clamp(1.25rem, 4vw, 3rem);
+    bottom: clamp(1.25rem, 4vw, 3rem);
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-background);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-style: italic;
+    line-height: 1.35;
+  }
+  .ag-auth__panel {
+    display: grid;
+    align-content: center;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 6vw, 5.5rem);
+  }
+  .ag-auth__login,
+  .ag-auth__recover {
+    width: 100%;
+    max-width: 28rem;
+  }
+  .ag-auth__recover {
+    display: none;
+  }
+  .ag-auth__recover:target {
+    display: block;
+  }
+  .ag-auth__recover:target ~ .ag-auth__login {
+    display: none;
+  }
+  .ag-auth__title {
+    margin-top: 1rem;
+    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  }
+  .ag-auth__lead {
+    margin-top: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-auth__notice {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1.1rem;
+    border-left: 2px solid var(--color-accent);
+    background: var(--color-surface);
+  }
+  .ag-auth__form {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+  .ag-auth__form .ag-btn {
+    width: 100%;
+  }
+  .ag-auth__label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .ag-auth__label-row a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-top: -0.9rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+    text-underline-offset: 0.2em;
+  }
+  .ag-auth__label-row a:hover,
+  .ag-auth__switch:hover {
+    color: var(--color-accent);
+  }
+  .ag-auth__switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    font-size: 0.9rem;
+    color: var(--color-foreground-muted);
+    text-decoration: none;
+  }
+  .ag-auth__alt {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-auth__alt p {
+    color: var(--color-foreground-muted);
+  }
+  .ag-auth__guest {
+    padding: 0 0 0.2rem;
+    border-width: 0 0 1px;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  .ag-auth__benefits {
+    margin-top: 2rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-surface);
+    font-size: 0.92rem;
+  }
+  .ag-auth__benefits ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  @media (max-width: 900px) {
+    .ag-auth {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .ag-auth__art {
+      min-height: 14rem;
+    }
+    .ag-auth__quote {
+      display: none;
+    }
+    .ag-auth__panel {
+      justify-items: center;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Account sign-in",
+  "tag": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Artwork image" },
+    {
+      "type": "text",
+      "id": "quote",
+      "label": "Quote over the image",
+      "default": "Every collection begins with one work you can't stop thinking about."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Collector account" },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "<p>Sign in to see your orders, saved addresses and early access to new works.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "benefits",
+      "label": "Account benefits",
+      "default": "<ul><li>Preview new works before they go online</li><li>Track orders and shipping</li><li>Faster checkout</li></ul>"
+    }
+  ],
+  "enabled_on": { "templates": ["customers/login"] }
+}
+{% endschema %}

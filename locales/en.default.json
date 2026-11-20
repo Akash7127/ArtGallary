@@ -72,7 +72,20 @@
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
-      "title": "Login"
+      "title": "Sign in",
+      "forgot": "Forgot password?",
+      "new_here": "New here? Create an account to follow artists and check out faster.",
+      "create": "Create an account",
+      "guest_text": "Prefer not to sign in?",
+      "guest": "Continue as a guest"
+    },
+    "recover": {
+      "eyebrow": "Reset password",
+      "title": "Forgot your password?",
+      "text": "Enter your email and we'll send you a link to set a new one.",
+      "submit": "Send reset link",
+      "cancel": "Back to sign in",
+      "success": "We've emailed you a link to reset your password."
     }
   },
   "collections": {
