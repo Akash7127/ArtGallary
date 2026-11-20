@@ -11,3 +11,6 @@
 #
 # Ignore templates and sections with a regular expression:
 #   /(templates|sections)/.*\.json/
+
+# Sample product data (not part of the theme)
+sample-data/
