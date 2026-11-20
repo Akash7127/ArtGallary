@@ -11,7 +11,27 @@
     "comment_form_email": "Email",
     "comment_form_name": "Name",
     "comment_form_submit": "Post",
-    "comment_form_title": "Add a comment"
+    "comment_form_title": "Add a comment",
+    "topics": "Topics",
+    "all": "All",
+    "empty_title": "Stories are on their way",
+    "empty_text": "Studio visits, artist conversations and collecting notes will appear here soon.",
+    "read_time": {
+      "one": "{{ count }} min read",
+      "other": "{{ count }} min read"
+    },
+    "read_more": "Read the story",
+    "by_author": "By {{ author }}",
+    "share": "Share",
+    "email": "Email",
+    "copy_link": "Copy link",
+    "copied": "Link copied",
+    "older": "Older story",
+    "newer": "Newer story",
+    "more_stories": "More from the journal",
+    "comment_moderated": "Thank you. Your comment will appear once it has been approved.",
+    "comment_posted": "Thank you. Your comment has been posted.",
+    "moderation_note": "Comments are checked before they appear."
   },
   "cart": {
     "checkout": "Check out",

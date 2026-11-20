@@ -1,0 +1,121 @@
+{% doc %}
+  Journal article card.
+
+  @param {article} article - The article
+  @param {string} [style] - 'feature' (large, side by side) or 'card' (default)
+  @param {string} [sizes] - The sizes attribute for the image
+
+  @example
+  {% render 'article-card', article: article, style: 'feature' %}
+{% enddoc %}
+
+{% liquid
+  assign style = style | default: 'card'
+  if style == 'feature'
+    assign sizes = sizes | default: '(min-width: 900px) 60vw, 100vw'
+    assign img_width = 1600
+  else
+    assign sizes = sizes | default: '(min-width: 900px) 33vw, 100vw'
+    assign img_width = 900
+  endif
+  assign words = article.content | strip_html | split: ' ' | size
+  assign minutes = words | divided_by: 200 | plus: 1
+  assign image_alt = article.image.alt | default: article.title
+%}
+
+<article class="ag-post ag-post--{{ style }}">
+  <a class="ag-post__media-link" href="{{ article.url }}" tabindex="-1" aria-hidden="true">
+    <div class="ag-media ag-post__media">
+      {% if article.image %}
+        {{
+          article.image
+          | image_url: width: img_width
+          | image_tag: loading: 'lazy', sizes: sizes, alt: image_alt
+        }}
+      {% else %}
+        {{ 'lifestyle-1' | placeholder_svg_tag }}
+      {% endif %}
+    </div>
+  </a>
+  <div class="ag-post__body">
+    <p class="ag-post__meta">
+      {% if article.tags.size > 0 %}
+        <span class="ag-post__tag">{{ article.tags.first }}</span>
+      {% endif %}
+      {{ article.published_at | time_tag: format: 'date' }}
+      <span aria-hidden="true">·</span>
+      {{ 'blog.read_time' | t: count: minutes }}
+    </p>
+    <h3 class="ag-post__title"><a href="{{ article.url }}">{{ article.title | escape }}</a></h3>
+    {% assign excerpt = article.excerpt | default: article.content | strip_html | truncatewords: 30 %}
+    {% if excerpt != blank and style == 'feature' %}
+      <p class="ag-post__excerpt">{{ excerpt | strip_html }}</p>
+      <a class="ag-link" href="{{ article.url }}">{{ 'blog.read_more' | t }} &rarr;</a>
+    {% elsif excerpt != blank %}
+      <p class="ag-post__excerpt">{{ excerpt | strip_html | truncatewords: 22 }}</p>
+    {% endif %}
+  </div>
+</article>
+
+{% stylesheet %}
+  .ag-post__media {
+    aspect-ratio: 3 / 2;
+  }
+  .ag-post__body {
+    padding-top: 1.25rem;
+  }
+  .ag-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-post__tag {
+    margin-right: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .ag-post__title {
+    margin-top: 0.75rem;
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  }
+  .ag-post__title a {
+    text-decoration: none;
+  }
+  .ag-post__title a:hover {
+    color: var(--color-accent);
+  }
+  .ag-post__excerpt {
+    margin-top: 0.6rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-post--feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+  .ag-post--feature .ag-post__media {
+    aspect-ratio: 4 / 3;
+  }
+  .ag-post--feature .ag-post__body {
+    padding-top: 0;
+  }
+  .ag-post--feature .ag-post__title {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+  }
+  .ag-post--feature .ag-post__excerpt {
+    margin-block: 1rem 1.75rem;
+    font-size: 1.05rem;
+  }
+  @media (max-width: 900px) {
+    .ag-post--feature {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstylesheet %}

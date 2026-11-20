@@ -1,68 +1,482 @@
 {% comment %}
-  This section is used in the article template to render the article page, which
-  displays the full content of the blog post and can optionally include a
-  comments section for customers (not shown in this example).
+  Journal article: heading, standfirst and details, wide cover, readable
+  text column, share links, tags, previous/next, more stories and comments.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/article
 {% endcomment %}
 
-{% if article.image %}
-  {{ article.image | image_url: width: 1000 | image_tag }}
-{% endif %}
+{% liquid
+  assign words = article.content | strip_html | split: ' ' | size
+  assign minutes = words | divided_by: 200 | plus: 1
+  assign share_url = shop.url | append: article.url
+  assign share_url_encoded = share_url | url_encode
+  assign share_title_encoded = article.title | url_encode
+  assign image_alt = article.image.alt | default: article.title
+%}
 
-<h1>{{ article.title }}</h1>
+<article class="ag-article full-width">
+  <header class="ag-article__head">
+    <a class="ag-article__back" href="{{ blog.url }}">&larr; {{ blog.title | escape }}</a>
+    {% if article.tags.size > 0 %}
+      <span class="ag-eyebrow">{{ article.tags.first }}</span>
+    {% endif %}
+    <h1 class="ag-article__title">{{ article.title | escape }}</h1>
+    {% if article.excerpt != blank %}
+      <div class="ag-article__standfirst">{{ article.excerpt }}</div>
+    {% endif %}
+    <p class="ag-article__meta">
+      {% if section.settings.show_author and article.author != blank %}
+        <span>{{ 'blog.by_author' | t: author: article.author }}</span>
+        <span aria-hidden="true">·</span>
+      {% endif %}
+      {{ article.published_at | time_tag: format: 'date' }}
+      <span aria-hidden="true">·</span>
+      <span>{{ 'blog.read_time' | t: count: minutes }}</span>
+    </p>
+  </header>
 
-{% assign date = article.published_at | time_tag: format: 'date' %}
-<p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+  {% if article.image %}
+    <figure class="ag-article__cover">
+      <div class="ag-media">
+        {{
+          article.image
+          | image_url: width: 2400
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            sizes: '(min-width: 1200px) 1100px, 100vw',
+            widths: '800, 1200, 1600, 2000, 2400',
+            alt: image_alt
+        }}
+      </div>
+      {% if article.image.alt != blank %}
+        <figcaption>{{ article.image.alt }}</figcaption>
+      {% endif %}
+    </figure>
+  {% endif %}
 
-{{ article.content }}
+  <div class="ag-article__layout">
+    <aside class="ag-article__share" aria-label="{{ 'blog.share' | t }}">
+      <span>{{ 'blog.share' | t }}</span>
+      <a href="https://wa.me/?text={{ share_title_encoded }}%20{{ share_url_encoded }}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url_encoded }}" target="_blank" rel="noopener">Facebook</a>
+      <a href="mailto:?subject={{ share_title_encoded }}&body={{ share_url_encoded }}">{{ 'blog.email' | t }}</a>
+      <button type="button" data-copy-link="{{ share_url }}" data-copied-text="{{ 'blog.copied' | t }}">
+        {{- 'blog.copy_link' | t -}}
+      </button>
+    </aside>
 
-{% if blog.comments_enabled? %}
-  <h2>{{ 'blog.article_comments' | t }}</h2>
-
-  <div id="comments">
-    {% paginate article.comments by 10 %}
-      {% for comment in article.comments %}
-        <div>
-          <p>{{ comment.author }}</p>
-          <p>
-            {{- comment.created_at | time_tag: format: 'date' -}}
-          </p>
-          <p>{{ comment.content }}</p>
-        </div>
-      {% endfor %}
-
-      {{ paginate | default_pagination: anchor: 'comments' }}
-    {% endpaginate %}
+    <div class="ag-article__content ag-rte ag-prose">
+      {{ article.content }}
+    </div>
   </div>
 
-  {% form 'new_comment', article %}
-    <h2>{{ 'blog.comment_form_title' | t }}</h2>
-
-    {{ form.errors | default_errors }}
-
-    <div>
-      <label for="author">{{ 'blog.comment_form_name' | t }}</label>
-      <input type="text" name="comment[author]" id="author" value="{{ form.author }}" required>
+  {% if article.tags.size > 0 %}
+    <div class="ag-article__tags">
+      {% for tag in article.tags %}
+        <a href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag }}</a>
+      {% endfor %}
     </div>
+  {% endif %}
 
-    <div>
-      <label for="email">{{ 'blog.comment_form_email' | t }}</label>
-      <input type="email" name="comment[email]" id="email" value="{{ form.email }}" required>
-    </div>
+  {% if blog.previous_article or blog.next_article %}
+    <nav class="ag-article__pager" aria-label="{{ 'blog.more_stories' | t }}">
+      {% if blog.next_article %}
+        <a href="{{ blog.next_article.url }}" class="ag-article__pager-prev">
+          <small>&larr; {{ 'blog.older' | t }}</small>
+          <span>{{ blog.next_article.title | escape }}</span>
+        </a>
+      {% endif %}
+      {% if blog.previous_article %}
+        <a href="{{ blog.previous_article.url }}" class="ag-article__pager-next">
+          <small>{{ 'blog.newer' | t }} &rarr;</small>
+          <span>{{ blog.previous_article.title | escape }}</span>
+        </a>
+      {% endif %}
+    </nav>
+  {% endif %}
 
-    <div>
-      <label for="body">{{ 'blog.comment_form_body' | t }}</label>
-      <textarea name="comment[body]" id="body" required>{{ form.body }}</textarea>
-    </div>
+  {% if section.settings.show_more %}
+    {% assign shown = 0 %}
+    <section class="ag-article__more" aria-labelledby="MoreStories">
+      <h2 id="MoreStories" class="ag-article__section-title">{{ 'blog.more_stories' | t }}</h2>
+      <ul class="ag-article__grid" role="list">
+        {% for item in blog.articles %}
+          {% if item.id == article.id %}{% continue %}{% endif %}
+          {% if shown < 3 %}
+            {% assign shown = shown | plus: 1 %}
+            <li>{% render 'article-card', article: item %}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
 
-    <input type="submit" value="{{ 'blog.comment_form_submit' | t }}">
-  {% endform %}
-{% endif %}
+  {% if blog.comments_enabled? %}
+    <section class="ag-article__comments" id="comments" aria-labelledby="CommentsTitle">
+      <h2 id="CommentsTitle" class="ag-article__section-title">
+        {{ 'blog.article_comments' | t }}
+        {% if article.comments_count > 0 %}<span>({{ article.comments_count }})</span>{% endif %}
+      </h2>
+
+      {% paginate article.comments by 10 %}
+        {% if article.comments.size > 0 %}
+          <ol class="ag-comments" role="list">
+            {% for comment in article.comments %}
+              <li class="ag-comment">
+                <p class="ag-comment__meta">
+                  <strong>{{ comment.author }}</strong>
+                  {{ comment.created_at | time_tag: format: 'date' }}
+                </p>
+                <div class="ag-comment__body">{{ comment.content }}</div>
+              </li>
+            {% endfor %}
+          </ol>
+          {% render 'pagination', paginate: paginate %}
+        {% endif %}
+      {% endpaginate %}
+
+      {% form 'new_comment', article, class: 'ag-comment-form' %}
+        <h3>{{ 'blog.comment_form_title' | t }}</h3>
+        {% if form.posted_successfully? %}
+          <p class="ag-comment-form__note" role="status">
+            {% if blog.moderated? %}
+              {{ 'blog.comment_moderated' | t }}
+            {% else %}
+              {{ 'blog.comment_posted' | t }}
+            {% endif %}
+          </p>
+        {% endif %}
+        {% if form.errors %}
+          <div class="ag-form-errors" role="alert">{{ form.errors | default_errors }}</div>
+        {% endif %}
+        <div class="ag-form-row">
+          <div class="ag-field">
+            <label for="CommentAuthor">{{ 'blog.comment_form_name' | t }}</label>
+            <input type="text" name="comment[author]" id="CommentAuthor" autocomplete="name" value="{{ form.author }}" required>
+          </div>
+          <div class="ag-field">
+            <label for="CommentEmail">{{ 'blog.comment_form_email' | t }}</label>
+            <input type="email" name="comment[email]" id="CommentEmail" autocomplete="email" value="{{ form.email }}" required>
+          </div>
+        </div>
+        <div class="ag-field">
+          <label for="CommentBody">{{ 'blog.comment_form_body' | t }}</label>
+          <textarea name="comment[body]" id="CommentBody" rows="5" required>{{ form.body }}</textarea>
+        </div>
+        {% if blog.moderated? %}
+          <p class="ag-comment-form__note">{{ 'blog.moderation_note' | t }}</p>
+        {% endif %}
+        <button type="submit" class="ag-btn">{{ 'blog.comment_form_submit' | t }}</button>
+      {% endform %}
+    </section>
+  {% endif %}
+</article>
+
+{% javascript %}
+  document.querySelectorAll('[data-copy-link]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(button.dataset.copyLink).then(function () {
+        var original = button.textContent;
+        button.textContent = button.dataset.copiedText;
+        setTimeout(function () { button.textContent = original; }, 2000);
+      });
+    });
+  });
+{% endjavascript %}
+
+{% stylesheet %}
+  .ag-article {
+    padding-bottom: var(--section-space);
+  }
+  .ag-article__head {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    width: min(var(--content-width), 52rem);
+    margin-inline: auto;
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(2rem, 4vw, 3rem);
+    text-align: center;
+  }
+  .ag-article__back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+    text-decoration: none;
+  }
+  .ag-article__back:hover {
+    color: var(--color-accent);
+  }
+  .ag-article__head .ag-eyebrow::before {
+    display: none;
+  }
+  .ag-article__title {
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+  }
+  .ag-article__standfirst {
+    max-width: 40rem;
+    font-size: 1.15rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-article__cover {
+    width: min(var(--content-width), 72rem);
+    margin: 0 auto;
+  }
+  .ag-article__cover .ag-media {
+    aspect-ratio: 16 / 9;
+  }
+  .ag-article__cover figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-article__layout {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 40rem) 9rem;
+    justify-content: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    width: var(--content-width);
+    margin: clamp(2.5rem, 6vw, 4rem) auto 0;
+  }
+  .ag-article__share {
+    position: sticky;
+    top: 7rem;
+    align-self: start;
+    display: grid;
+    justify-items: start;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+  }
+  .ag-article__share span {
+    margin-bottom: 0.25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-article__share a,
+  .ag-article__share button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ag-article__share a:hover,
+  .ag-article__share button:hover {
+    color: var(--color-accent);
+  }
+  .ag-prose {
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+  .ag-prose > p:first-child::first-letter {
+    float: left;
+    margin: 0.35rem 0.6rem 0 0;
+    font-family: var(--font-heading--family);
+    font-size: 4.25rem;
+    line-height: 0.8;
+    color: var(--color-accent);
+  }
+  .ag-prose h2,
+  .ag-prose h3 {
+    margin-top: 2.5rem;
+  }
+  .ag-prose h2 {
+    font-size: 2rem;
+  }
+  .ag-prose h3 {
+    font-size: 1.5rem;
+  }
+  .ag-prose a {
+    color: var(--color-accent);
+    text-underline-offset: 0.2em;
+  }
+  .ag-prose img {
+    width: 100%;
+    margin-block: 1rem;
+  }
+  .ag-prose blockquote {
+    margin: 2rem 0;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--color-accent);
+    font-family: var(--font-heading--family);
+    font-size: 1.6rem;
+    font-style: italic;
+    line-height: 1.35;
+  }
+  .ag-prose ul,
+  .ag-prose ol {
+    padding-left: 1.25rem;
+  }
+  .ag-article__tags,
+  .ag-article__pager,
+  .ag-article__more,
+  .ag-article__comments {
+    width: min(var(--content-width), 40rem);
+    margin: clamp(2.5rem, 5vw, 3.5rem) auto 0;
+  }
+  .ag-article__more {
+    width: var(--content-width);
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ag-article__tags a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  .ag-article__tags a:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  .ag-article__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding-block: 1.5rem;
+    border-block: 1px solid var(--color-border);
+  }
+  .ag-article__pager a {
+    display: grid;
+    gap: 0.35rem;
+    text-decoration: none;
+  }
+  .ag-article__pager-next {
+    grid-column: 2;
+    text-align: right;
+  }
+  .ag-article__pager small {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-article__pager span {
+    font-family: var(--font-heading--family);
+    font-size: 1.2rem;
+  }
+  .ag-article__pager a:hover span {
+    color: var(--color-accent);
+  }
+  .ag-article__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-article__section-title {
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  }
+  .ag-article__section-title span {
+    color: var(--color-foreground-muted);
+  }
+  .ag-comments {
+    margin: 0 0 2rem;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-comment {
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ag-comment__meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-comment__meta strong {
+    color: var(--color-foreground);
+  }
+  .ag-comment__body {
+    margin-top: 0.5rem;
+  }
+  .ag-comment-form {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    background: var(--color-surface);
+  }
+  .ag-comment-form h3 {
+    font-size: 1.5rem;
+  }
+  .ag-comment-form__note {
+    font-size: 0.88rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-comment-form .ag-btn {
+    justify-self: start;
+  }
+  @media (max-width: 1000px) {
+    .ag-article__layout {
+      grid-template-columns: minmax(0, 40rem);
+    }
+    .ag-article__share {
+      position: static;
+      order: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 1.25rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+    .ag-article__share span {
+      margin: 0;
+    }
+  }
+  @media (max-width: 900px) {
+    .ag-article__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .ag-article__pager {
+      grid-template-columns: 1fr;
+    }
+    .ag-article__pager-next {
+      grid-column: 1;
+      text-align: left;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.article",
-  "settings": []
+  "settings": [
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": true },
+    { "type": "checkbox", "id": "show_more", "label": "Show more stories", "default": true }
+  ]
 }
 {% endschema %}
