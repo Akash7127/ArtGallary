@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-artists-directory",
+      "settings": {
+        "eyebrow": "Represented artists",
+        "heading": "Artists",
+        "show_grid": true,
+        "columns": "4",
+        "show_index": true
+      }
+    }
+  },
+  "order": ["main"]
+}

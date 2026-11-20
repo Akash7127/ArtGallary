@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-artist-profile",
+      "settings": {
+        "limit": 12
+      }
+    }
+  },
+  "order": ["main"]
+}

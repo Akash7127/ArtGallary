@@ -282,3 +282,7 @@ a:hover > .ag-media img,
     scroll-behavior: auto !important;
   }
 }
+
+.ag-rte > * + * {
+  margin-top: 0.9rem;
+}

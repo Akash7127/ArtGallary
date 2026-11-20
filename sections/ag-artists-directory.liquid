@@ -1,0 +1,253 @@
+{% comment %}
+  Artists directory.
+
+  Reads "artist" metaobjects (Settings > Custom data > Metaobjects) with
+  fields: name, portrait, practice, location, bio, artworks.
+  If there are none yet, it falls back to product vendors so the A–Z list
+  still works from day one.
+{% endcomment %}
+
+{% liquid
+  assign artists = shop.metaobjects.artist.values
+  assign has_artists = false
+  if artists.size > 0
+    assign has_artists = true
+  endif
+
+  assign entries = ''
+  if has_artists
+    for artist in artists
+      assign name = artist.name.value | default: artist.system.handle | strip
+      assign entries = entries | append: name | append: '::' | append: artist.system.url | append: '||'
+    endfor
+  else
+    for vendor in shop.vendors
+      assign vendor_url = vendor | url_for_vendor
+      assign entries = entries | append: vendor | append: '::' | append: vendor_url | append: '||'
+    endfor
+  endif
+  assign entries = entries | split: '||' | sort_natural
+  assign letters_used = ''
+  for entry in entries
+    assign first = entry | slice: 0 | upcase
+    unless letters_used contains first
+      assign letters_used = letters_used | append: first
+    endunless
+  endfor
+  assign alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
+%}
+
+<div class="ag-dir full-width" style="--dir-cols: {{ section.settings.columns }}">
+  <header class="ag-dir__head">
+    <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+    <h1 class="ag-dir__title">{{ section.settings.heading | default: page.title }}</h1>
+    {% if section.settings.intro != blank %}
+      <div class="ag-dir__intro">{{ section.settings.intro }}</div>
+    {% elsif page.content != blank %}
+      <div class="ag-dir__intro ag-rte">{{ page.content }}</div>
+    {% endif %}
+  </header>
+
+  {% if section.settings.show_grid %}
+    <ul class="ag-dir__grid" role="list">
+      {% if has_artists %}
+        {% for artist in artists %}
+          <li>
+            {% render 'artist-card',
+              artist: artist,
+              index: forloop.index,
+              sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw'
+            %}
+          </li>
+        {% endfor %}
+      {% elsif entries.size == 0 %}
+        {% for i in (1..8) %}
+          <li>{% render 'artist-card', index: i %}</li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+  {% endif %}
+
+  {% if section.settings.show_index and entries.size > 0 %}
+    <section class="ag-dir__index" aria-labelledby="ArtistIndex-{{ section.id }}">
+      <div class="ag-dir__index-head">
+        <h2 id="ArtistIndex-{{ section.id }}">{{ 'artists.index_heading' | t }}</h2>
+        <nav class="ag-dir__letters" aria-label="{{ 'artists.jump_to_letter' | t }}">
+          {% for letter in alphabet %}
+            {% if letters_used contains letter %}
+              <a href="#Letter-{{ section.id }}-{{ letter }}">{{ letter }}</a>
+            {% else %}
+              <span aria-hidden="true">{{ letter }}</span>
+            {% endif %}
+          {% endfor %}
+        </nav>
+      </div>
+
+      <div class="ag-dir__groups">
+        {% for letter in alphabet %}
+          {% unless letters_used contains letter %}{% continue %}{% endunless %}
+          <div class="ag-dir__group" id="Letter-{{ section.id }}-{{ letter }}">
+            <h3 class="ag-dir__letter ag-display">{{ letter }}</h3>
+            <ul class="ag-dir__names" role="list">
+              {% for entry in entries %}
+                {% assign parts = entry | split: '::' %}
+                {% assign first = parts[0] | slice: 0 | upcase %}
+                {% if first == letter %}
+                  <li><a href="{{ parts[1] }}">{{ parts[0] }}</a></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .ag-dir {
+    width: var(--content-width);
+    margin-inline: auto;
+    padding-bottom: var(--section-space);
+  }
+  .ag-dir__head {
+    max-width: 48rem;
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 5vw, 3.5rem);
+  }
+  .ag-dir__title {
+    margin-top: 1rem;
+    font-size: clamp(2.75rem, 6vw, 5rem);
+  }
+  .ag-dir__intro {
+    margin-top: 1.25rem;
+    font-size: 1.05rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-dir__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--dir-cols), minmax(0, 1fr));
+    gap: clamp(2rem, 4vw, 3.25rem) clamp(1rem, 2.5vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-dir__grid:empty {
+    display: none;
+  }
+  .ag-dir__index {
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-dir__grid:empty + .ag-dir__index {
+    margin-top: 0;
+  }
+  .ag-dir__index-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+  }
+  .ag-dir__index-head h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+  .ag-dir__letters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+  }
+  .ag-dir__letters a,
+  .ag-dir__letters span {
+    display: grid;
+    place-items: center;
+    min-width: 2.25rem;
+    height: 2.75rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  .ag-dir__letters a {
+    font-weight: 600;
+  }
+  .ag-dir__letters a:hover {
+    color: var(--color-accent);
+  }
+  .ag-dir__letters span {
+    color: var(--color-foreground-muted);
+    opacity: 0.4;
+  }
+  .ag-dir__groups {
+    columns: 3 16rem;
+    column-gap: clamp(2rem, 5vw, 4rem);
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  .ag-dir__group {
+    break-inside: avoid;
+    padding-bottom: 2rem;
+    scroll-margin-top: 7rem;
+  }
+  .ag-dir__letter {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 1.75rem;
+    color: var(--color-accent);
+  }
+  .ag-dir__names {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-dir__names a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+  .ag-dir__names a:hover {
+    color: var(--color-accent);
+  }
+  @media (max-width: 1100px) {
+    .ag-dir__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 750px) {
+    .ag-dir__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Artists directory",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Represented artists" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Artists" },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction",
+      "info": "Leave empty to use the page content instead.",
+      "default": "<p>Painters, sculptors and makers we work with closely, from first solo shows to long careers.</p>"
+    },
+    { "type": "checkbox", "id": "show_grid", "label": "Show artist portraits", "default": true },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Portraits per row on desktop",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4"
+    },
+    { "type": "checkbox", "id": "show_index", "label": "Show A–Z index", "default": true }
+  ],
+  "presets": [{ "name": "Artists directory" }],
+  "enabled_on": { "templates": ["page"] }
+}
+{% endschema %}
