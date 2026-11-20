@@ -1,37 +1,499 @@
 {% comment %}
-  This section is used in the cart template to render /cart page with an
-  overview of the items in customer's cart.
+  Cart page: list of selected artworks with quantity and remove controls,
+  an order summary with a note for the gallery, and checkout.
+  Works without JavaScript; with it, quantity changes update straight away.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
 {% endcomment %}
 
-<h1>{{ 'cart.title' | t }}</h1>
+<div class="ag-cart full-width">
+  <header class="ag-cart__head">
+    <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+    <h1 class="ag-cart__title">{{ 'cart.title' | t }}</h1>
+    {% if cart.item_count > 0 %}
+      <p class="ag-cart__count">{{ 'cart.item_count' | t: count: cart.item_count }}</p>
+    {% endif %}
+  </header>
 
-<form action="{{ routes.cart_url }}" method="post">
-  <table>
-    {% for item in cart.items %}
-      <tr>
-        <td>
-          {% render 'image', image: item.image, url: item.url %}
-        </td>
-        <td>
-          <p>{{ item.product.title }}</p>
-          {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-        </td>
-        <td>
-          <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
+  {% if cart.item_count == 0 %}
+    <div class="ag-cart__empty">
+      <h2>{{ 'cart.empty_title' | t }}</h2>
+      <p>{{ 'cart.empty_text' | t }}</p>
+      <div class="ag-cart__empty-actions">
+        <a class="ag-btn" href="{{ section.settings.browse_link | default: routes.all_products_collection_url }}">
+          {{- 'cart.browse_artworks' | t -}}
+        </a>
+        <a class="ag-btn ag-btn--outline" href="{{ section.settings.secondary_link | default: '/pages/exhibitions' }}">
+          {{- 'cart.see_exhibitions' | t -}}
+        </a>
+      </div>
+    </div>
+  {% else %}
+    <form action="{{ routes.cart_url }}" method="post" id="CartForm" class="ag-cart__grid" novalidate>
+      <div class="ag-cart__items">
+        <ul class="ag-cart__list" role="list">
+          {% for item in cart.items %}
+            <li class="ag-line" data-line="{{ forloop.index }}">
+              <a class="ag-media ag-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+                {% if item.image %}
+                  {{ item.image | image_url: width: 400 | image_tag: loading: 'lazy', sizes: '9rem', alt: item.product.title }}
+                {% else %}
+                  {{ 'product-1' | placeholder_svg_tag }}
+                {% endif %}
+              </a>
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-</form>
+              <div class="ag-line__info">
+                {% if item.product.vendor != blank %}
+                  <p class="ag-line__artist">{{ item.product.vendor }}</p>
+                {% endif %}
+                <h2 class="ag-line__title"><a href="{{ item.url }}">{{ item.product.title | escape }}</a></h2>
+                {% unless item.product.has_only_default_variant %}
+                  <p class="ag-line__variant">{{ item.variant.title | escape }}</p>
+                {% endunless %}
+                {% for property in item.properties %}
+                  {% unless property.last == blank or property.first contains '_' %}
+                    <p class="ag-line__variant">{{ property.first }}: {{ property.last }}</p>
+                  {% endunless %}
+                {% endfor %}
+                {% if item.selling_plan_allocation %}
+                  <p class="ag-line__variant">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                {% endif %}
+                <p class="ag-line__unit">
+                  {% if item.original_price > item.final_price %}
+                    <s>{{ item.original_price | money }}</s>
+                  {% endif %}
+                  {{ item.final_price | money }}
+                </p>
+                {% for discount in item.line_level_discount_allocations %}
+                  <p class="ag-line__discount">{{ discount.discount_application.title }} (−{{ discount.amount | money }})</p>
+                {% endfor %}
+
+                <div class="ag-line__controls">
+                  <div class="ag-qty">
+                    <button
+                      type="button"
+                      class="ag-qty__btn"
+                      data-qty-step="-1"
+                      aria-label="{{ 'cart.decrease' | t: title: item.product.title }}"
+                    >
+                      &minus;
+                    </button>
+                    <label class="visually-hidden" for="Qty-{{ forloop.index }}">
+                      {{- 'cart.quantity_for' | t: title: item.product.title -}}
+                    </label>
+                    <input
+                      class="ag-qty__input"
+                      type="number"
+                      id="Qty-{{ forloop.index }}"
+                      name="updates[]"
+                      value="{{ item.quantity }}"
+                      min="0"
+                      {% if item.variant.inventory_management == 'shopify' and item.variant.inventory_policy == 'deny' %}
+                        max="{{ item.variant.inventory_quantity }}"
+                      {% endif %}
+                      inputmode="numeric"
+                      data-qty-input
+                    >
+                    <button
+                      type="button"
+                      class="ag-qty__btn"
+                      data-qty-step="1"
+                      aria-label="{{ 'cart.increase' | t: title: item.product.title }}"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <a class="ag-line__remove" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+                </div>
+              </div>
+
+              <p class="ag-line__total">{{ item.final_line_price | money }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <noscript>
+          <button type="submit" name="update" class="ag-btn ag-btn--outline">{{ 'cart.update' | t }}</button>
+        </noscript>
+
+        <a class="ag-link ag-cart__continue" href="{{ section.settings.browse_link | default: routes.all_products_collection_url }}">
+          &larr; {{ 'cart.continue' | t }}
+        </a>
+      </div>
+
+      <aside class="ag-cart__summary" aria-labelledby="CartSummary">
+        <h2 id="CartSummary" class="ag-cart__summary-title">{{ 'cart.summary' | t }}</h2>
+
+        <dl class="ag-cart__totals">
+          <div>
+            <dt>{{ 'cart.subtotal' | t }}</dt>
+            <dd>{{ cart.items_subtotal_price | money }}</dd>
+          </div>
+          {% for discount in cart.cart_level_discount_applications %}
+            <div class="ag-cart__discount">
+              <dt>{{ discount.title }}</dt>
+              <dd>−{{ discount.total_allocated_amount | money }}</dd>
+            </div>
+          {% endfor %}
+          <div class="ag-cart__total">
+            <dt>{{ 'cart.total' | t }}</dt>
+            <dd>{{ cart.total_price | money_with_currency }}</dd>
+          </div>
+        </dl>
+        <p class="ag-cart__tax">{{ 'cart.taxes_note' | t }}</p>
+
+        {% if section.settings.show_note %}
+          <details class="ag-cart__note"{% if cart.note != blank %} open{% endif %}>
+            <summary>{{ 'cart.note_label' | t }}</summary>
+            <label class="visually-hidden" for="CartNote">{{ 'cart.note_label' | t }}</label>
+            <textarea
+              id="CartNote"
+              name="note"
+              rows="3"
+              placeholder="{{ 'cart.note_placeholder' | t }}"
+            >{{ cart.note }}</textarea>
+          </details>
+        {% endif %}
+
+        <button type="submit" name="checkout" class="ag-btn ag-cart__checkout">
+          {{ 'cart.checkout' | t }}
+        </button>
+
+        {% if section.settings.show_express and additional_checkout_buttons %}
+          <div class="ag-cart__express">{{ content_for_additional_checkout_buttons }}</div>
+        {% endif %}
+
+        {% if section.settings.assurance_1 != blank or section.settings.assurance_2 != blank %}
+          <ul class="ag-cart__assure" role="list">
+            {% if section.settings.assurance_1 != blank %}
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"/></svg>
+                {{ section.settings.assurance_1 }}
+              </li>
+            {% endif %}
+            {% if section.settings.assurance_2 != blank %}
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"/></svg>
+                {{ section.settings.assurance_2 }}
+              </li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      </aside>
+    </form>
+  {% endif %}
+</div>
+
+{% javascript %}
+  (function () {
+    var form = document.getElementById('CartForm');
+    if (!form) return;
+    var timer;
+
+    function submitUpdate() {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        form.classList.add('is-updating');
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'update';
+        hidden.value = '1';
+        form.appendChild(hidden);
+        form.submit();
+      }, 450);
+    }
+
+    form.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-qty-step]');
+      if (!button) return;
+      var input = button.parentElement.querySelector('[data-qty-input]');
+      var step = Number(button.dataset.qtyStep);
+      var max = input.max ? Number(input.max) : Infinity;
+      var next = Math.min(max, Math.max(0, Number(input.value || 0) + step));
+      if (next === Number(input.value)) return;
+      input.value = next;
+      submitUpdate();
+    });
+
+    form.addEventListener('change', function (event) {
+      if (event.target.matches('[data-qty-input]')) submitUpdate();
+    });
+  })();
+{% endjavascript %}
+
+{% stylesheet %}
+  .ag-cart {
+    width: var(--content-width);
+    margin-inline: auto;
+    padding-bottom: var(--section-space);
+  }
+  .ag-cart__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .ag-cart__head .ag-eyebrow {
+    flex-basis: 100%;
+  }
+  .ag-cart__title {
+    font-size: clamp(2.75rem, 6vw, 4.5rem);
+  }
+  .ag-cart__count {
+    color: var(--color-foreground-muted);
+  }
+  .ag-cart__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+  }
+  .ag-cart__grid.is-updating .ag-cart__items {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .ag-cart__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-line {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ag-line__media {
+    display: block;
+    aspect-ratio: 4 / 5;
+  }
+  .ag-line__artist {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .ag-line__title {
+    margin-top: 0.35rem;
+    font-size: 1.5rem;
+    font-style: italic;
+  }
+  .ag-line__title a {
+    text-decoration: none;
+  }
+  .ag-line__title a:hover {
+    color: var(--color-accent);
+  }
+  .ag-line__variant,
+  .ag-line__unit {
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-line__unit s {
+    margin-right: 0.35rem;
+  }
+  .ag-line__discount {
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--color-accent);
+  }
+  .ag-line__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 1.25rem;
+  }
+  .ag-qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+  }
+  .ag-qty__btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  .ag-qty__btn:hover {
+    color: var(--color-accent);
+  }
+  .ag-qty__input {
+    width: 2.5rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .ag-qty__input::-webkit-outer-spin-button,
+  .ag-qty__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .ag-line__remove {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+    text-underline-offset: 0.2em;
+  }
+  .ag-line__remove:hover {
+    color: var(--color-accent);
+  }
+  .ag-line__total {
+    font-family: var(--font-heading--family);
+    font-size: 1.25rem;
+    white-space: nowrap;
+  }
+  .ag-cart__continue {
+    margin-top: 2rem;
+  }
+  .ag-cart__items noscript .ag-btn {
+    margin-top: 1.5rem;
+  }
+  .ag-cart__summary {
+    position: sticky;
+    top: 6.5rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: var(--color-surface);
+  }
+  .ag-cart__summary-title {
+    font-size: 1.75rem;
+  }
+  .ag-cart__totals {
+    margin: 1.25rem 0 0;
+  }
+  .ag-cart__totals > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ag-cart__totals dd {
+    margin: 0;
+  }
+  .ag-cart__discount {
+    color: var(--color-accent);
+  }
+  .ag-cart__total {
+    font-family: var(--font-heading--family);
+    font-size: 1.35rem;
+    border-bottom: 0 !important;
+  }
+  .ag-cart__tax {
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-cart__note {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-cart__note summary {
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .ag-cart__note textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: inherit;
+    resize: vertical;
+  }
+  .ag-cart__checkout {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+  .ag-cart__express {
+    margin-top: 0.75rem;
+  }
+  .ag-cart__assure {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.85rem;
+  }
+  .ag-cart__assure li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ag-cart__assure svg {
+    flex: none;
+    color: var(--color-accent);
+  }
+  .ag-cart__empty {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    max-width: 36rem;
+    padding: clamp(2rem, 6vw, 4rem) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-cart__empty h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+  .ag-cart__empty p {
+    color: var(--color-foreground-muted);
+  }
+  .ag-cart__empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 900px) {
+    .ag-cart__grid {
+      grid-template-columns: 1fr;
+    }
+    .ag-cart__summary {
+      position: static;
+    }
+  }
+  @media (max-width: 600px) {
+    .ag-line {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .ag-line__total {
+      grid-column: 2;
+      font-size: 1.1rem;
+    }
+    .ag-line__title {
+      font-size: 1.25rem;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.cart",
-  "settings": []
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Your selection" },
+    { "type": "checkbox", "id": "show_note", "label": "Show note for the gallery", "default": true },
+    { "type": "checkbox", "id": "show_express", "label": "Show express checkout buttons", "default": true },
+    { "type": "text", "id": "assurance_1", "label": "Assurance line 1", "default": "Certificate of authenticity with every original" },
+    { "type": "text", "id": "assurance_2", "label": "Assurance line 2", "default": "Insured shipping, packed by hand" },
+    { "type": "url", "id": "browse_link", "label": "\"Continue browsing\" link", "info": "Defaults to all artworks." },
+    { "type": "url", "id": "secondary_link", "label": "Second link on empty cart", "info": "Defaults to /pages/exhibitions." }
+  ]
 }
 {% endschema %}

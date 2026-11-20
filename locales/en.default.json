@@ -14,10 +14,28 @@
     "comment_form_title": "Add a comment"
   },
   "cart": {
-    "checkout": "Checkout",
+    "checkout": "Check out",
     "title": "Cart",
-    "update": "Update",
-    "remove": "Remove"
+    "update": "Update cart",
+    "remove": "Remove",
+    "item_count": {
+      "one": "{{ count }} item",
+      "other": "{{ count }} items"
+    },
+    "empty_title": "Your cart is empty",
+    "empty_text": "When a work catches your eye, add it here. You can also enquire about any piece before you buy.",
+    "browse_artworks": "Browse artworks",
+    "see_exhibitions": "See exhibitions",
+    "decrease": "Decrease quantity of {{ title }}",
+    "increase": "Increase quantity of {{ title }}",
+    "quantity_for": "Quantity of {{ title }}",
+    "continue": "Continue browsing",
+    "summary": "Order summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "taxes_note": "Taxes and shipping are worked out at checkout.",
+    "note_label": "Add a note for the gallery",
+    "note_placeholder": "Gift message, framing request or delivery instructions"
   },
   "customers": {
     "login": {
