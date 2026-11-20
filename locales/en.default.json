@@ -28,7 +28,27 @@
     }
   },
   "collections": {
-    "title": "Collections"
+    "title": "Collections",
+    "filter": "Filter",
+    "sort_by": "Sort by",
+    "close": "Close filters",
+    "works_count": {
+      "one": "{{ count }} work",
+      "other": "{{ count }} works"
+    },
+    "remove_filter": "Remove filter",
+    "clear_all": "Clear all",
+    "price_from": "From",
+    "price_to": "To",
+    "show_results": "Show results",
+    "no_matches": "No artworks match these filters",
+    "no_matches_text": "Try removing a filter or two to see more work.",
+    "empty": "No artworks here yet",
+    "empty_text": "New works are added often. Browse the full collection in the meantime.",
+    "browse_all": "Browse all artworks",
+    "pagination": "Pages",
+    "previous": "Previous page",
+    "next": "Next page"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
@@ -63,7 +83,8 @@
   "artworks": {
     "sold": "Sold",
     "placeholder_title": "Artwork title",
-    "placeholder_artist": "Artist name"
+    "placeholder_artist": "Artist name",
+    "from_price": "From {{ price }}"
   },
   "newsletter": {
     "email": "Your email address",

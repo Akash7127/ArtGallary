@@ -1,0 +1,111 @@
+{% doc %}
+  Artwork card used on the homepage and collection pages.
+  The product vendor is shown as the artist and the product type as the medium.
+
+  @param {product} [product] - The artwork. Leave out to render a placeholder card.
+  @param {number} [index] - Position in the list, used to pick a placeholder drawing
+  @param {string} [sizes] - The sizes attribute for the image
+
+  @example
+  {% render 'artwork-card', product: product, sizes: '(min-width: 900px) 25vw, 50vw' %}
+{% enddoc %}
+
+{% liquid
+  assign sizes = sizes | default: '(min-width: 900px) 25vw, 50vw'
+  assign placeholder_index = index | default: 1 | modulo: 6 | plus: 1
+  assign placeholder = 'product-' | append: placeholder_index
+%}
+
+<article class="ag-art">
+  {% if product %}
+    <a class="ag-art__link" href="{{ product.url }}">
+      <div class="ag-media ag-art__media">
+        {% if product.featured_image %}
+          {{
+            product.featured_image
+            | image_url: width: 900
+            | image_tag: loading: 'lazy', sizes: sizes, widths: '360, 540, 720, 900', alt: product.featured_image.alt
+          }}
+        {% else %}
+          {{ placeholder | placeholder_svg_tag }}
+        {% endif %}
+        {% unless product.available %}
+          <span class="ag-art__badge">{{ 'artworks.sold' | t }}</span>
+        {% endunless %}
+      </div>
+      <div class="ag-art__info">
+        <h3 class="ag-art__title">{{ product.title | escape }}</h3>
+        {% if product.vendor != blank %}
+          <p class="ag-art__artist">{{ product.vendor }}</p>
+        {% endif %}
+        {% if product.type != blank %}
+          <p class="ag-art__medium">{{ product.type }}</p>
+        {% endif %}
+        <p class="ag-art__price">
+          {% if product.available %}
+            {% if product.price_varies %}
+              {%- assign min_price = product.price_min | money -%}
+              {{ 'artworks.from_price' | t: price: min_price }}
+            {% else %}
+              {{ product.price | money }}
+            {% endif %}
+          {% else %}
+            {{ 'artworks.sold' | t }}
+          {% endif %}
+        </p>
+      </div>
+    </a>
+  {% else %}
+    <div class="ag-art__link">
+      <div class="ag-media ag-art__media">{{ placeholder | placeholder_svg_tag }}</div>
+      <div class="ag-art__info">
+        <h3 class="ag-art__title">{{ 'artworks.placeholder_title' | t }}</h3>
+        <p class="ag-art__artist">{{ 'artworks.placeholder_artist' | t }}</p>
+      </div>
+    </div>
+  {% endif %}
+</article>
+
+{% stylesheet %}
+  .ag-art__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .ag-art__media {
+    aspect-ratio: 4 / 5;
+  }
+  .ag-art__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--color-background);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ag-art__info {
+    padding-top: 1rem;
+  }
+  .ag-art__title {
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+  .ag-art__artist {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-art__medium {
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-art__price {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+{% endstylesheet %}
