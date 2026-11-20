@@ -1,0 +1,28 @@
+{% doc %}
+  Page numbers with previous and next arrows.
+
+  @param {object} paginate - The paginate object
+
+  @example
+  {% render 'pagination', paginate: paginate %}
+{% enddoc %}
+
+{% if paginate.pages > 1 %}
+  <nav class="ag-pages" aria-label="{{ 'collections.pagination' | t }}">
+    {% if paginate.previous %}
+      <a class="ag-pages__arrow" href="{{ paginate.previous.url }}" aria-label="{{ 'collections.previous' | t }}">&larr;</a>
+    {% endif %}
+    {% for part in paginate.parts %}
+      {% if part.is_link %}
+        <a href="{{ part.url }}">{{ part.title }}</a>
+      {% elsif part.title == paginate.current_page %}
+        <span aria-current="page">{{ part.title }}</span>
+      {% else %}
+        <span>{{ part.title }}</span>
+      {% endif %}
+    {% endfor %}
+    {% if paginate.next %}
+      <a class="ag-pages__arrow" href="{{ paginate.next.url }}" aria-label="{{ 'collections.next' | t }}">&rarr;</a>
+    {% endif %}
+  </nav>
+{% endif %}

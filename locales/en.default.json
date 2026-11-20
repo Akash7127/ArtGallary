@@ -86,10 +86,25 @@
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search articles, pages, or products",
+    "placeholder": "Search artworks, artists, exhibitions",
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
-    "results_for_html": "{{ count }} results found for {{ terms }}"
+    "results_for_html": "{{ count }} results found for {{ terms }}",
+    "results_heading": "Results for “{{ terms }}”",
+    "results_count": {
+      "one": "{{ count }} result",
+      "other": "{{ count }} results"
+    },
+    "try": "Try:",
+    "artists": "Artists",
+    "exhibitions": "Exhibitions",
+    "artworks": "Artworks",
+    "pages": "Pages and stories",
+    "type_article": "Journal",
+    "type_page": "Page",
+    "no_artworks": "No artworks match this search.",
+    "no_results_title": "Nothing found for “{{ terms }}”",
+    "no_results_text": "Check the spelling, try a broader word such as a medium or colour, or browse the full collection."
   },
   "header": {
     "menu": "Menu",

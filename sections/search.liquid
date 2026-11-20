@@ -1,70 +1,421 @@
 {% comment %}
-  This section is used in the search template to render search results for
-  products, articles, and pages.
+  Search page: large search box, matching artists and exhibitions
+  (from metaobjects), artworks with the same filters and sorting as
+  collection pages, and matching pages and journal posts.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/search
 {% endcomment %}
 
-<h1>{{ 'search.title' | t }}</h1>
+{% liquid
+  assign terms = search.terms | strip
+  assign terms_down = terms | downcase
+  assign encoded_terms = terms | url_encode
 
-<form action="{{ routes.search_url }}" method="get" role="search">
-  <input
-    type="search"
-    size="50"
-    name="q"
-    value="{{ search.terms | escape }}"
-    placeholder="{{ 'search.placeholder' | t }}"
-  >
-  <button type="submit">{{ 'search.submit' | t }}</button>
-</form>
+  assign show_filters = false
+  if search.performed and section.settings.enable_filtering and search.filters.size > 0
+    assign show_filters = true
+  endif
 
-{% if search.performed %}
-  {% if search.results_count == 0 %}
-    <p>{{ 'search.no_results_html' | t: terms: search.terms }}</p>
-  {% else %}
-    <p>{{ 'search.results_for_html' | t: terms: search.terms, count: search.results_count }}</p>
+  assign active_count = 0
+  for filter in search.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != null or filter.max_value.value != null
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
 
-    <div class="search-results">
-      {% paginate search.results by 20 %}
-        {% # Search result items may be an article, a page, or a product. %}
-        {% for result in search.results %}
-          <div class="search-result">
-            {% assign featured_image = result.featured_image | default: result.image %}
-            {% if featured_image %}
-              {% render 'image', class: 'search-result__image', image: featured_image, url: result.url, width: 400 %}
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign clear_url = routes.search_url | append: '?q=' | append: encoded_terms | append: '&options[prefix]=last'
+
+  assign matched_artists = ''
+  assign matched_exhibitions = ''
+  if search.performed and terms != blank
+    for artist in shop.metaobjects.artist.values
+      assign name_down = artist.name.value | downcase
+      if name_down contains terms_down
+        assign matched_artists = matched_artists | append: forloop.index0 | append: ','
+      endif
+    endfor
+    for ex in shop.metaobjects.exhibition.values
+      assign title_down = ex.title.value | downcase
+      assign artists_down = ex.artist_names.value | downcase
+      if title_down contains terms_down or artists_down contains terms_down
+        assign matched_exhibitions = matched_exhibitions | append: forloop.index0 | append: ','
+      endif
+    endfor
+  endif
+  assign matched_artists = matched_artists | split: ','
+  assign matched_exhibitions = matched_exhibitions | split: ','
+%}
+
+{{ 'facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
+<div class="ag-coll ag-search full-width" style="--coll-cols: 4">
+  <header class="ag-search__head">
+    <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+    <h1 class="ag-search__title">
+      {% if search.performed and terms != blank %}
+        {{ 'search.results_heading' | t: terms: terms }}
+      {% else %}
+        {{ 'search.title' | t }}
+      {% endif %}
+    </h1>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" class="ag-search__form">
+      <label class="visually-hidden" for="SearchInput">{{ 'search.placeholder' | t }}</label>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+      <input
+        type="search"
+        id="SearchInput"
+        name="q"
+        value="{{ terms | escape }}"
+        placeholder="{{ 'search.placeholder' | t }}"
+        autocomplete="off"
+        {% unless search.performed %}
+          autofocus
+        {% endunless %}
+      >
+      <input type="hidden" name="options[prefix]" value="last">
+      <button type="submit" class="ag-btn">{{ 'search.submit' | t }}</button>
+    </form>
+
+    {% if search.performed %}
+      <p class="ag-search__summary" role="status">
+        {{ 'search.results_count' | t: count: search.results_count }}
+      </p>
+    {% elsif section.settings.suggestions != blank %}
+      <div class="ag-search__suggest">
+        <span>{{ 'search.try' | t }}</span>
+        {% assign suggestions = section.settings.suggestions | split: ',' %}
+        {% for suggestion in suggestions %}
+          {% assign s = suggestion | strip %}
+          {% if s != blank %}
+            <a class="ag-chip" href="{{ routes.search_url }}?q={{ s | url_encode }}&options[prefix]=last">{{ s }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </header>
+
+  {% if search.performed %}
+    {% if matched_artists.size > 0 %}
+      <section class="ag-search__group" aria-labelledby="SearchArtists">
+        <h2 id="SearchArtists" class="ag-search__group-title">{{ 'search.artists' | t }}</h2>
+        <ul class="ag-search__people" role="list">
+          {% for i in matched_artists limit: 8 %}
+            {% assign idx = i | plus: 0 %}
+            {% assign artist = shop.metaobjects.artist.values[idx] %}
+            <li>
+              <a href="{{ artist.system.url }}" class="ag-search__person">
+                <span class="ag-media ag-search__avatar">
+                  {% if artist.portrait.value %}
+                    {{ artist.portrait.value | image_url: width: 160 | image_tag: loading: 'lazy', alt: '' }}
+                  {% endif %}
+                </span>
+                <span>
+                  <strong>{{ artist.name.value }}</strong>
+                  {% if artist.practice.value != blank %}<small>{{ artist.practice.value }}</small>{% endif %}
+                </span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% if matched_exhibitions.size > 0 %}
+      <section class="ag-search__group" aria-labelledby="SearchExhibitions">
+        <h2 id="SearchExhibitions" class="ag-search__group-title">{{ 'search.exhibitions' | t }}</h2>
+        {% for i in matched_exhibitions limit: 6 %}
+          {% assign idx = i | plus: 0 %}
+          {% render 'exhibition-card', exhibition: shop.metaobjects.exhibition.values[idx], style: 'row' %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% paginate search.results by section.settings.per_page %}
+      {% liquid
+        assign product_count = 0
+        assign other_count = 0
+        for result in search.results
+          if result.object_type == 'product'
+            assign product_count = product_count | plus: 1
+          else
+            assign other_count = other_count | plus: 1
+          endif
+        endfor
+      %}
+
+      <section class="ag-search__group" aria-labelledby="SearchArtworks">
+        <h2 id="SearchArtworks" class="ag-search__group-title">{{ 'search.artworks' | t }}</h2>
+
+        <form
+          id="SearchFilters"
+          class="ag-coll__form"
+          action="{{ routes.search_url }}"
+          method="get"
+          data-auto-submit
+        >
+          <input type="hidden" name="q" value="{{ terms | escape }}">
+          <input type="hidden" name="options[prefix]" value="last">
+
+          {% render 'facets-toolbar',
+            results: search,
+            count: search.results_count,
+            show_filters: show_filters,
+            enable_sorting: section.settings.enable_sorting,
+            active_count: active_count,
+            sort_by: sort_by,
+            clear_url: clear_url
+          %}
+
+          <div class="ag-coll__body{% if show_filters %} ag-coll__body--filters{% endif %}">
+            {% if show_filters %}
+              {% render 'facets-panel', results: search, active_count: active_count, clear_url: clear_url %}
             {% endif %}
-            <div class="search-result__content">
-              <p>
-                {{ result.title | link_to: result.url }}
-                {% if result.price %}
-                  {{ result.price | money_with_currency }}
-                {% endif %}
-              </p>
+
+            <div class="ag-coll__results">
+              {% if product_count > 0 %}
+                <ul class="ag-coll__grid" role="list">
+                  {% for result in search.results %}
+                    {% if result.object_type == 'product' %}
+                      <li>
+                        {% render 'artwork-card',
+                          product: result,
+                          index: forloop.index,
+                          sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw'
+                        %}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% elsif search.results_count == 0 or other_count == 0 %}
+                <div class="ag-coll__empty">
+                  {% if active_count > 0 %}
+                    <h2>{{ 'collections.no_matches' | t }}</h2>
+                    <p>{{ 'collections.no_matches_text' | t }}</p>
+                    <a class="ag-btn ag-btn--outline" href="{{ clear_url }}">{{ 'collections.clear_all' | t }}</a>
+                  {% else %}
+                    <h2>{{ 'search.no_results_title' | t: terms: terms }}</h2>
+                    <p>{{ 'search.no_results_text' | t }}</p>
+                    <a class="ag-btn ag-btn--outline" href="{{ routes.all_products_collection_url }}">
+                      {{- 'collections.browse_all' | t -}}
+                    </a>
+                  {% endif %}
+                </div>
+              {% else %}
+                <p class="ag-search__none">{{ 'search.no_artworks' | t }}</p>
+              {% endif %}
+
+              {% if other_count > 0 %}
+                <div class="ag-search__others">
+                  <h3 class="ag-search__group-title">{{ 'search.pages' | t }}</h3>
+                  <ul class="ag-search__list" role="list">
+                    {% for result in search.results %}
+                      {% unless result.object_type == 'product' %}
+                        <li>
+                          <a href="{{ result.url }}">
+                            <small>
+                              {%- if result.object_type == 'article' -%}
+                                {{ 'search.type_article' | t }}
+                              {%- else -%}
+                                {{ 'search.type_page' | t }}
+                              {%- endif -%}
+                            </small>
+                            <strong>{{ result.title | escape }}</strong>
+                            {% assign excerpt = result.excerpt | default: result.content | strip_html | truncatewords: 24 %}
+                            {% if excerpt != blank %}<span>{{ excerpt }}</span>{% endif %}
+                          </a>
+                        </li>
+                      {% endunless %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+
+              {% render 'pagination', paginate: paginate %}
             </div>
           </div>
-        {% endfor %}
-
-        {{ paginate | default_pagination }}
-      {% endpaginate %}
-    </div>
+        </form>
+      </section>
+    {% endpaginate %}
   {% endif %}
-{% endif %}
+</div>
 
 {% stylesheet %}
-  .search-results {
+  .ag-search__head {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
   }
-  .search-results .prev,
-  .search-results .page,
-  .search-results .next {
-    grid-column: 1 / -1;
+  .ag-search__title {
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+  }
+  .ag-search__form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 48rem;
+    padding: 0.4rem 0.4rem 0.4rem 1.25rem;
+    border: 1px solid var(--color-foreground);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-background) 60%, white);
+  }
+  .ag-search__form:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .ag-search__form svg {
+    flex: none;
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__form input[type='search'] {
+    flex: 1;
+    min-width: 0;
+    min-height: 3rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.1rem;
+  }
+  .ag-search__form input[type='search']:focus {
+    outline: none;
+  }
+  .ag-search__summary {
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__suggest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ag-search__suggest > span {
+    margin-right: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__group {
+    padding-top: clamp(1.5rem, 3vw, 2rem);
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-search__group + .ag-search__group {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+  .ag-search__group-title {
+    margin-bottom: 1.25rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+  .ag-search__people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-search__person {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0.4rem 1.25rem 0.4rem 0.4rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .ag-search__person:hover {
+    border-color: var(--color-foreground);
+  }
+  .ag-search__person > span:last-child {
+    display: grid;
+  }
+  .ag-search__person small {
+    font-size: 0.75rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+  }
+  .ag-search__none {
+    padding-block: 1rem 2rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__others {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+  .ag-search__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-search__list a {
+    display: grid;
+    gap: 0.25rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+  }
+  .ag-search__list a:hover strong {
+    color: var(--color-accent);
+  }
+  .ag-search__list small {
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-search__list strong {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 1.3rem;
+  }
+  .ag-search__list span {
+    font-size: 0.92rem;
+    color: var(--color-foreground-muted);
+  }
+  @media (max-width: 600px) {
+    .ag-search__form {
+      flex-wrap: wrap;
+      border-radius: 1.5rem;
+      padding: 0.5rem 0.5rem 0.5rem 1rem;
+    }
+    .ag-search__form .ag-btn {
+      width: 100%;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.search",
-  "settings": []
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Find" },
+    {
+      "type": "text",
+      "id": "suggestions",
+      "label": "Search suggestions",
+      "info": "Shown before someone searches. Separate with commas.",
+      "default": "Abstract, Landscape, Sculpture, Works on paper, Prints"
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "min": 12,
+      "max": 36,
+      "step": 4,
+      "label": "Results per page",
+      "default": 24
+    },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Show filters", "default": true },
+    { "type": "checkbox", "id": "enable_sorting", "label": "Show sorting", "default": true }
+  ]
 }
 {% endschema %}

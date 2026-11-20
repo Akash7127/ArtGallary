@@ -1,0 +1,96 @@
+{% doc %}
+  Filter panel (left column on desktop, slide-in on phones) for a
+  collection or search. Must be rendered inside the filter form.
+
+  @param {object} results - The collection or search object
+  @param {number} active_count - Number of active filters
+  @param {string} clear_url - URL that removes all filters
+
+  @example
+  {% render 'facets-panel', results: collection, active_count: 0, clear_url: clear_url %}
+{% enddoc %}
+
+<aside id="CollectionFilterPanel" class="ag-coll__filters" aria-label="{{ 'collections.filter' | t }}">
+  <div class="ag-coll__filters-head">
+    <h2>{{ 'collections.filter' | t }}</h2>
+    <button type="button" class="ag-coll__close" data-filter-close aria-label="{{ 'collections.close' | t }}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"/></svg>
+    </button>
+  </div>
+
+  {% for filter in results.filters %}
+    <details class="ag-filter" open>
+      <summary class="ag-filter__title">
+        {{ filter.label | escape }}
+        {% if filter.active_values.size > 0 %}
+          <span class="ag-coll__badge">{{ filter.active_values.size }}</span>
+        {% endif %}
+      </summary>
+
+      {% case filter.type %}
+        {% when 'price_range' %}
+          <div class="ag-filter__price">
+            <label>
+              <span>{{ 'collections.price_from' | t }}</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                name="{{ filter.min_value.param_name }}"
+                min="0"
+                max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                placeholder="0"
+                {% if filter.min_value.value != null %}
+                  value="{{ filter.min_value.value | money_without_currency | remove: ',' }}"
+                {% endif %}
+              >
+            </label>
+            <label>
+              <span>{{ 'collections.price_to' | t }}</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                name="{{ filter.max_value.param_name }}"
+                min="0"
+                max="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                placeholder="{{ filter.range_max | money_without_currency | remove: ',' }}"
+                {% if filter.max_value.value != null %}
+                  value="{{ filter.max_value.value | money_without_currency | remove: ',' }}"
+                {% endif %}
+              >
+            </label>
+          </div>
+        {% else %}
+          <ul class="ag-filter__list" role="list">
+            {% for value in filter.values %}
+              {% assign input_id = 'Filter-' | append: filter.param_name | append: '-' | append: forloop.index | handleize %}
+              <li>
+                <input
+                  type="checkbox"
+                  id="{{ input_id }}"
+                  name="{{ value.param_name }}"
+                  value="{{ value.value }}"
+                  {% if value.active %}
+                    checked
+                  {% endif %}
+                  {% if value.count == 0 and value.active == false %}
+                    disabled
+                  {% endif %}
+                >
+                <label for="{{ input_id }}">
+                  {{ value.label | escape }}
+                  <span class="ag-filter__count">{{ value.count }}</span>
+                </label>
+              </li>
+            {% endfor %}
+          </ul>
+      {% endcase %}
+    </details>
+  {% endfor %}
+
+  <div class="ag-coll__filters-foot">
+    <button type="submit" class="ag-btn">{{ 'collections.show_results' | t }}</button>
+    {% if active_count > 0 %}
+      <a class="ag-link" href="{{ clear_url }}">{{ 'collections.clear_all' | t }}</a>
+    {% endif %}
+  </div>
+</aside>
