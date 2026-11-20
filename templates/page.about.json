@@ -1,0 +1,140 @@
+{
+  "sections": {
+    "hero": {
+      "type": "ag-page-hero",
+      "settings": {
+        "eyebrow": "About us",
+        "heading": "A gallery built around artists",
+        "text": "<p>We started with one room, a handful of painters we believed in, and the idea that good art should be easy to live with. That idea still shapes everything we do.</p>",
+        "show_image": true
+      }
+    },
+    "statement": {
+      "type": "ag-statement",
+      "blocks": {
+        "fact_1": { "type": "fact", "settings": { "value": "2010", "label": "Gallery founded" } },
+        "fact_2": { "type": "fact", "settings": { "value": "60+", "label": "Represented artists" } },
+        "fact_3": { "type": "fact", "settings": { "value": "120", "label": "Exhibitions held" } },
+        "fact_4": { "type": "fact", "settings": { "value": "30", "label": "Countries shipped to" } }
+      },
+      "block_order": ["fact_1", "fact_2", "fact_3", "fact_4"],
+      "settings": {
+        "eyebrow": "What we believe",
+        "lead": "Art is not a luxury object. It is a long conversation between the person who makes it and the person who lives with it.",
+        "text": "<p>We work with artists over many years, not single shows. We visit studios, follow ideas as they grow, and give each body of work the time and space it needs. For collectors, we keep things simple and honest: clear prices, careful advice and no pressure.</p>",
+        "link_label": ""
+      }
+    },
+    "story": {
+      "type": "ag-story",
+      "blocks": {
+        "chapter_1": {
+          "type": "chapter",
+          "settings": {
+            "kicker": "2010",
+            "heading": "A single white room",
+            "text": "<p>The gallery opened in a small converted workshop with five artists and borrowed lights. The first show sold out in a week, mostly to neighbours who had never bought art before.</p>"
+          }
+        },
+        "chapter_2": {
+          "type": "chapter",
+          "settings": {
+            "kicker": "Studios",
+            "heading": "Time with the artists",
+            "text": "<p>Most of our year is spent away from the gallery: in studios, at foundries, in weaving centres and print workshops. Knowing how a work is made helps us explain it, and helps collectors trust it.</p>"
+          }
+        },
+        "chapter_3": {
+          "type": "chapter",
+          "settings": {
+            "kicker": "Today",
+            "heading": "On the wall and online",
+            "text": "<p>We now show work in the gallery and in online viewing rooms, and send it, insured and packed by hand, to collectors around the world.</p>",
+            "link_label": "See current exhibitions",
+            "link": "/pages/exhibitions"
+          }
+        }
+      },
+      "block_order": ["chapter_1", "chapter_2", "chapter_3"],
+      "settings": {
+        "eyebrow": "Our story",
+        "heading": ""
+      }
+    },
+    "timeline": {
+      "type": "ag-timeline",
+      "blocks": {
+        "m_1": { "type": "moment", "settings": { "year": "2010", "title": "The gallery opens", "text": "First exhibition of five painters in our original space." } },
+        "m_2": { "type": "moment", "settings": { "year": "2014", "title": "A second floor for sculpture", "text": "A larger space for three-dimensional work and installations." } },
+        "m_3": { "type": "moment", "settings": { "year": "2018", "title": "Art advisory begins", "text": "Helping homes, hotels and offices build thoughtful collections." } },
+        "m_4": { "type": "moment", "settings": { "year": "2021", "title": "Online viewing rooms", "text": "Exhibitions open to collectors wherever they are." } },
+        "m_5": { "type": "moment", "settings": { "year": "2026", "title": "A new online home", "text": "Every artwork, artist and exhibition in one place." } }
+      },
+      "block_order": ["m_1", "m_2", "m_3", "m_4", "m_5"],
+      "settings": {
+        "eyebrow": "Milestones",
+        "heading": "Along the way"
+      }
+    },
+    "services": {
+      "type": "ag-services",
+      "blocks": {
+        "service_1": {
+          "type": "service",
+          "settings": {
+            "title": "Art advisory",
+            "text": "<p>Tell us about your space and taste. We shortlist works, arrange viewings and help you build a collection over time.</p>",
+            "link_label": "Book a consultation",
+            "link": "/pages/contact?topic=advisory"
+          }
+        },
+        "service_2": {
+          "type": "service",
+          "settings": {
+            "title": "Commissions",
+            "text": "<p>Site-specific pieces for homes, hotels and offices, made by our artists to your brief, size and timeline.</p>",
+            "link_label": "Start a commission",
+            "link": "/pages/contact?topic=commission"
+          }
+        },
+        "service_3": {
+          "type": "service",
+          "settings": {
+            "title": "Framing and shipping",
+            "text": "<p>Museum-grade framing in our studio, and insured, crated delivery to your door anywhere in the world.</p>",
+            "link_label": "Ask us",
+            "link": "/pages/contact"
+          }
+        }
+      },
+      "block_order": ["service_1", "service_2", "service_3"],
+      "settings": {
+        "eyebrow": "What we do",
+        "heading": "More than a gallery"
+      }
+    },
+    "team": {
+      "type": "ag-team",
+      "blocks": {
+        "p_1": { "type": "person", "settings": { "name": "Founder name", "role": "Founder and director" } },
+        "p_2": { "type": "person", "settings": { "name": "Curator name", "role": "Curator" } },
+        "p_3": { "type": "person", "settings": { "name": "Advisor name", "role": "Art advisor" } },
+        "p_4": { "type": "person", "settings": { "name": "Manager name", "role": "Gallery manager" } }
+      },
+      "block_order": ["p_1", "p_2", "p_3", "p_4"],
+      "settings": {
+        "eyebrow": "The team",
+        "heading": "People behind the gallery"
+      }
+    },
+    "newsletter": {
+      "type": "ag-newsletter",
+      "settings": {
+        "eyebrow": "Stay close",
+        "heading": "Openings, new work and studio notes",
+        "text": "<p>One thoughtful email a month. Be first to see new works before they go online.</p>"
+      }
+    }
+  },
+  "order": ["hero", "statement", "story", "timeline", "services", "team", "newsletter"]
+}
