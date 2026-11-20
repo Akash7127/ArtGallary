@@ -193,9 +193,17 @@
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
     "card": "Gift card",
-    "expired": "This gift card has expired",
+    "expired": "This gift card has expired or is no longer active.",
     "expires_on": "Expires on {{ expires_on }}",
-    "use_at_checkout": "Use this gift card at checkout"
+    "use_at_checkout": "Enter this code at checkout to use your balance. Any amount left over stays on the card for next time.",
+    "title": "Your {{ shop }} gift card",
+    "initial_value": "Original value {{ value }}",
+    "code_label": "Gift card code",
+    "copy": "Copy code",
+    "copied": "Copied",
+    "qr_text": "Visiting the gallery? Show this code at the desk to pay in person.",
+    "shop": "Start exploring",
+    "print": "Print"
   },
   "password": {
     "title": "This shop is private",
