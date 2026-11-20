@@ -40,7 +40,11 @@
   "password": {
     "title": "This shop is private",
     "password": "Password",
-    "enter": "Enter"
+    "enter": "Enter",
+    "notify": "Notify me",
+    "signup_success": "Thank you. We'll let you know when we open.",
+    "toggle": "Enter with password",
+    "wrong": "That password is not correct. Please try again."
   },
   "search": {
     "title": "Search",
