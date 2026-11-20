@@ -1,23 +1,237 @@
 {% comment %}
-  This section is used in the 404 template to render page shown when customers
-  enter an invalid store URL.
+  404 page: an empty frame with a gallery wall label, a search box,
+  helpful links and a few artworks to keep browsing.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/404
 {% endcomment %}
 
-<h1>{{ '404.title' | t }}</h1>
+<div class="ag-404 full-width">
+  <div class="ag-404__grid">
+    <figure class="ag-404__wall" aria-hidden="true">
+      <div class="ag-404__frame">
+        <div class="ag-404__mat">
+          <span class="ag-404__code ag-display">404</span>
+        </div>
+      </div>
+      <figcaption class="ag-404__label">
+        <strong>{{ '404.label_title' | t }}</strong>
+        <span>{{ '404.label_year' | t }}</span>
+        <span>{{ '404.label_medium' | t }}</span>
+      </figcaption>
+    </figure>
 
-<p>
-  {{ '404.not_found' | t }}
-</p>
+    <div class="ag-404__text">
+      <span class="ag-eyebrow">{{ '404.eyebrow' | t }}</span>
+      <h1 class="ag-404__title">{{ '404.title' | t }}</h1>
+      <p class="ag-404__intro">{{ '404.not_found' | t }}</p>
 
-<a href="{{ routes.all_products_collection_url }}">
-  {{ '404.back_to_shopping' | t }}
-</a>
+      <form action="{{ routes.search_url }}" method="get" role="search" class="ag-404__search">
+        <label class="visually-hidden" for="NotFoundSearch">{{ 'search.placeholder' | t }}</label>
+        <input
+          type="search"
+          id="NotFoundSearch"
+          name="q"
+          placeholder="{{ 'search.placeholder' | t }}"
+        >
+        <input type="hidden" name="options[prefix]" value="last">
+        <button type="submit" class="ag-btn">{{ 'search.submit' | t }}</button>
+      </form>
+
+      <nav class="ag-404__links" aria-label="{{ '404.helpful_links' | t }}">
+        <a href="{{ routes.all_products_collection_url }}">{{ '404.link_artworks' | t }}</a>
+        <a href="{{ section.settings.artists_link | default: '/pages/artists' }}">{{ '404.link_artists' | t }}</a>
+        <a href="{{ section.settings.exhibitions_link | default: '/pages/exhibitions' }}">{{ '404.link_exhibitions' | t }}</a>
+        <a href="{{ routes.root_url }}">{{ '404.link_home' | t }}</a>
+      </nav>
+    </div>
+  </div>
+
+  {% assign picks = section.settings.collection %}
+  {% if section.settings.show_artworks and picks != blank and picks.products_count > 0 %}
+    <section class="ag-404__picks" aria-labelledby="NotFoundPicks">
+      <div class="ag-section-head">
+        <h2 id="NotFoundPicks">{{ '404.picks_heading' | t }}</h2>
+        <a class="ag-link" href="{{ picks.url }}">{{ 'collections.browse_all' | t }} &rarr;</a>
+      </div>
+      <ul class="ag-404__picks-grid" role="list">
+        {% for product in picks.products limit: 4 %}
+          <li>{% render 'artwork-card', product: product, index: forloop.index %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .ag-404 {
+    width: var(--content-width);
+    margin-inline: auto;
+    padding-block: clamp(3rem, 8vw, 6rem) var(--section-space);
+  }
+  .ag-404__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(2.5rem, 7vw, 7rem);
+  }
+  .ag-404__wall {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin: 0;
+  }
+  .ag-404__frame {
+    flex: 1;
+    max-width: 24rem;
+    aspect-ratio: 4 / 5;
+    padding: clamp(0.9rem, 2vw, 1.25rem);
+    background: linear-gradient(135deg, #4a3a2c, #2a2018);
+    box-shadow: 0 30px 50px -28px rgb(0 0 0 / 0.55), inset 0 0 0 1px rgb(255 255 255 / 0.08);
+    transform: rotate(-2.5deg);
+    transform-origin: top center;
+    animation: ag-404-sway 6s ease-in-out infinite;
+  }
+  .ag-404__mat {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 12%;
+    background: #fbf9f5;
+    box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.18);
+  }
+  .ag-404__code {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    color: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+    letter-spacing: 0.05em;
+  }
+  .ag-404__label {
+    display: grid;
+    gap: 0.15rem;
+    flex: none;
+    max-width: 11rem;
+    padding: 0.85rem 1rem;
+    background: #fff;
+    box-shadow: 0 6px 16px -10px rgb(0 0 0 / 0.35);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #333;
+  }
+  .ag-404__label strong {
+    font-family: var(--font-heading--family);
+    font-size: 0.95rem;
+    font-style: italic;
+    font-weight: var(--font-heading--weight);
+    color: #111;
+  }
+  .ag-404__title {
+    margin-top: 1rem;
+    font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+  }
+  .ag-404__intro {
+    max-width: 32rem;
+    margin-top: 1.25rem;
+    font-size: 1.05rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-404__search {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 32rem;
+    margin-top: 2rem;
+    padding: 0.4rem 0.4rem 0.4rem 1.25rem;
+    border: 1px solid var(--color-foreground);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-background) 60%, white);
+  }
+  .ag-404__search:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .ag-404__search input[type='search'] {
+    flex: 1;
+    min-width: 0;
+    min-height: 3rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+  .ag-404__search input[type='search']:focus {
+    outline: none;
+  }
+  .ag-404__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    margin-top: 1.75rem;
+  }
+  .ag-404__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .ag-404__links a:hover {
+    color: var(--color-accent);
+    border-color: currentColor;
+  }
+  .ag-404__picks {
+    margin-top: var(--section-space);
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-404__picks h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+  .ag-404__picks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @keyframes ag-404-sway {
+    0%, 100% { transform: rotate(-2.5deg); }
+    50% { transform: rotate(-1deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ag-404__frame {
+      animation: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .ag-404__grid {
+      grid-template-columns: 1fr;
+    }
+    .ag-404__frame {
+      max-width: 15rem;
+    }
+    .ag-404__picks-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 500px) {
+    .ag-404__search {
+      flex-direction: column;
+      border-radius: 1.5rem;
+      padding: 0.5rem;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.404",
-  "settings": []
+  "settings": [
+    { "type": "url", "id": "artists_link", "label": "Artists link", "info": "Defaults to /pages/artists." },
+    { "type": "url", "id": "exhibitions_link", "label": "Exhibitions link", "info": "Defaults to /pages/exhibitions." },
+    { "type": "checkbox", "id": "show_artworks", "label": "Show artworks to keep browsing", "default": true },
+    { "type": "collection", "id": "collection", "label": "Artworks collection" }
+  ]
 }
 {% endschema %}

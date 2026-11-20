@@ -1,8 +1,18 @@
 {
   "404": {
-    "title": "404",
-    "not_found": "Page not found.",
-    "back_to_shopping": "Back to shopping"
+    "title": "This wall is empty",
+    "not_found": "The page you were looking for has moved, sold or never existed. Try a search, or pick up from one of these.",
+    "back_to_shopping": "Back to shopping",
+    "eyebrow": "Page not found",
+    "label_title": "Untitled (Missing)",
+    "label_year": "Error 404",
+    "label_medium": "Broken link on bare wall",
+    "helpful_links": "Helpful links",
+    "link_artworks": "Artworks",
+    "link_artists": "Artists",
+    "link_exhibitions": "Exhibitions",
+    "link_home": "Home",
+    "picks_heading": "Something to look at instead"
   },
   "blog": {
     "article_comments": "Comments",

@@ -11,7 +11,10 @@
   "sections": {
     "main": {
       "type": "404",
-      "settings": {}
+      "settings": {
+        "show_artworks": true,
+        "collection": "all"
+      }
     }
   },
   "order": [
