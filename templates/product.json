@@ -12,9 +12,18 @@
     "main": {
       "type": "product",
       "settings": {}
+    },
+    "related": {
+      "type": "ag-related",
+      "settings": {
+        "eyebrow": "Keep looking",
+        "heading": "You may also like",
+        "limit": 4
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "related"
   ]
 }

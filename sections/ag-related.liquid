@@ -1,0 +1,83 @@
+{% comment %}
+  Related artworks from Shopify's product recommendations.
+  The page loads first; this section then fetches itself with
+  recommendations for the current product.
+{% endcomment %}
+
+<div
+  class="ag-related"
+  data-related
+  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.limit }}&intent=related"
+>
+  {% if recommendations.performed and recommendations.products_count > 0 %}
+    <div class="ag-related__inner ag-section">
+      <div class="ag-section-head">
+        <div>
+          <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+          <h2>{{ section.settings.heading }}</h2>
+        </div>
+      </div>
+      <ul class="ag-related__grid" role="list">
+        {% for item in recommendations.products %}
+          <li>
+            {% render 'artwork-card',
+              product: item,
+              index: forloop.index,
+              sizes: '(min-width: 900px) 25vw, 50vw'
+            %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+{% javascript %}
+  (function () {
+    document.querySelectorAll('[data-related]').forEach(function (el) {
+      if (el.children.length || !el.dataset.url || !('fetch' in window)) return;
+      fetch(el.dataset.url)
+        .then(function (response) { return response.text(); })
+        .then(function (text) {
+          var html = document.createElement('div');
+          html.innerHTML = text;
+          var found = html.querySelector('[data-related]');
+          if (found && found.innerHTML.trim()) el.innerHTML = found.innerHTML;
+        })
+        .catch(function () {});
+    });
+  })();
+{% endjavascript %}
+
+{% stylesheet %}
+  .ag-related__inner {
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-related__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (max-width: 900px) {
+    .ag-related__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Related artworks",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Keep looking" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "You may also like" },
+    { "type": "range", "id": "limit", "min": 2, "max": 8, "step": 2, "label": "Number of artworks", "default": 4 }
+  ],
+  "presets": [{ "name": "Related artworks" }],
+  "enabled_on": { "templates": ["product"] }
+}
+{% endschema %}

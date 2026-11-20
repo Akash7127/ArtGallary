@@ -93,5 +93,24 @@
   },
   "footer": {
     "contact": "Contact"
+  },
+  "product": {
+    "breadcrumbs": "Breadcrumbs",
+    "home": "Home",
+    "artworks": "Artworks",
+    "zoom": "View larger image",
+    "close": "Close",
+    "colour_note": "Colours may vary slightly from screen to screen.",
+    "medium": "Medium",
+    "dimensions": "Size",
+    "edition": "Edition",
+    "framing": "Framing",
+    "add_to_cart": "Add to cart",
+    "unavailable": "Unavailable",
+    "enquire": "Enquire about this work",
+    "about_work": "About the work",
+    "about_artist": "About the artist",
+    "more_by": "More by {{ artist }}",
+    "shipping": "Shipping and returns"
   }
 }
