@@ -78,7 +78,28 @@
     "account": "Account"
   },
   "exhibitions": {
-    "view": "View exhibition"
+    "view": "View exhibition",
+    "placeholder_title": "Exhibition title",
+    "placeholder_artists": "A solo exhibition",
+    "placeholder_dates": "1 Dec – 15 Jan 2027",
+    "from_date": "From {{ date }}",
+    "status_current": "Now showing",
+    "status_upcoming": "Coming soon",
+    "status_past": "Past",
+    "jump_to": "Jump to",
+    "current": "Now showing",
+    "upcoming": "Coming soon",
+    "past": "Past exhibitions",
+    "none": "New exhibitions will be announced here soon.",
+    "all": "All exhibitions",
+    "dates": "Dates",
+    "location": "Location",
+    "opening": "Opening",
+    "artists": "Artists",
+    "plan_visit": "Plan your visit",
+    "installation_views": "Installation views",
+    "works": "Works in the exhibition",
+    "artists_in_show": "Artists in the exhibition"
   },
   "artworks": {
     "sold": "Sold",

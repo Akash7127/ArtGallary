@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-exhibition-detail",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-exhibitions-directory",
+      "settings": {
+        "eyebrow": "Programme",
+        "heading": "Exhibitions",
+        "show_past": true,
+        "past_limit": 24
+      }
+    }
+  },
+  "order": ["main"]
+}

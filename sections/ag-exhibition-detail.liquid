@@ -1,0 +1,295 @@
+{% comment %}
+  Single exhibition page, rendered for each "exhibition" metaobject entry
+  (templates/metaobject/exhibition.json).
+
+  Fields used: title, subtitle, artist_names, artists (artist entries),
+  start_date, end_date, location, opening, cover, summary, description,
+  installation_views (images), artworks (products).
+{% endcomment %}
+
+{% liquid
+  assign ex = metaobject
+  assign title = ex.title.value | default: ex.system.handle
+  assign back_url = section.settings.back_link | default: '/pages/exhibitions'
+  assign views = ex.installation_views.value
+  assign works = ex.artworks.value
+  assign artists = ex.artists.value
+%}
+
+<article class="ag-exd full-width">
+  <header class="ag-exd__hero">
+    <div class="ag-media ag-exd__cover">
+      {% if ex.cover.value %}
+        {{
+          ex.cover.value
+          | image_url: width: 2400
+          | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1600, 2000, 2400', alt: title
+        }}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag }}
+      {% endif %}
+    </div>
+
+    <div class="ag-exd__intro">
+      <a class="ag-exd__back" href="{{ back_url }}">&larr; {{ 'exhibitions.all' | t }}</a>
+      <div class="ag-exd__meta">
+        {% render 'exhibition-status', exhibition: ex %}
+        {% if ex.location.value != blank %}<span>{{ ex.location.value }}</span>{% endif %}
+      </div>
+      <h1 class="ag-exd__title">{{ title }}</h1>
+      {% if ex.subtitle.value != blank or ex.artist_names.value != blank %}
+        <p class="ag-exd__artists">
+          {{ ex.subtitle.value }}
+          {{ ex.artist_names.value }}
+        </p>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="ag-exd__body">
+    <aside class="ag-exd__facts">
+      <dl>
+        <div>
+          <dt>{{ 'exhibitions.dates' | t }}</dt>
+          <dd>{% render 'exhibition-dates', exhibition: ex %}</dd>
+        </div>
+        {% if ex.location.value != blank %}
+          <div>
+            <dt>{{ 'exhibitions.location' | t }}</dt>
+            <dd>{{ ex.location.value }}</dd>
+          </div>
+        {% endif %}
+        {% if ex.opening.value != blank %}
+          <div>
+            <dt>{{ 'exhibitions.opening' | t }}</dt>
+            <dd>{{ ex.opening.value }}</dd>
+          </div>
+        {% endif %}
+        {% if artists.count > 0 %}
+          <div>
+            <dt>{{ 'exhibitions.artists' | t }}</dt>
+            <dd>
+              {% for artist in artists %}
+                <a href="{{ artist.system.url }}">{{ artist.name.value | default: artist.system.handle }}</a>
+                {%- unless forloop.last %}, {% endunless %}
+              {% endfor %}
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+      {% if section.settings.visit_link != blank %}
+        <a class="ag-btn ag-btn--outline" href="{{ section.settings.visit_link }}">{{ 'exhibitions.plan_visit' | t }}</a>
+      {% endif %}
+    </aside>
+
+    <div class="ag-exd__text">
+      {% if ex.summary.value != blank %}
+        <p class="ag-exd__lead ag-display">{{ ex.summary.value }}</p>
+      {% endif %}
+      {% if ex.description != blank %}
+        <div class="ag-exd__desc ag-rte">{{ ex.description | metafield_tag }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if views.count > 0 %}
+    <section class="ag-exd__views" aria-labelledby="Views-{{ section.id }}">
+      <h2 id="Views-{{ section.id }}" class="ag-exd__section-title">{{ 'exhibitions.installation_views' | t }}</h2>
+      <ul class="ag-exd__views-row" role="list">
+        {% for image in views %}
+          <li class="ag-media">
+            {{
+              image
+              | image_url: width: 1400
+              | image_tag: loading: 'lazy', sizes: '(min-width: 900px) 60vw, 85vw', alt: image.alt
+            }}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if works.count > 0 %}
+    <section class="ag-exd__works" aria-labelledby="Works-{{ section.id }}">
+      <h2 id="Works-{{ section.id }}" class="ag-exd__section-title">{{ 'exhibitions.works' | t }}</h2>
+      <ul class="ag-exd__grid" role="list">
+        {% for product in works %}
+          <li>{% render 'artwork-card', product: product, index: forloop.index %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if artists.count > 0 %}
+    <section class="ag-exd__artist-list" aria-labelledby="Artists-{{ section.id }}">
+      <h2 id="Artists-{{ section.id }}" class="ag-exd__section-title">{{ 'exhibitions.artists_in_show' | t }}</h2>
+      <ul class="ag-exd__grid" role="list">
+        {% for artist in artists %}
+          <li>{% render 'artist-card', artist: artist, index: forloop.index %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</article>
+
+{% stylesheet %}
+  .ag-exd {
+    padding-bottom: var(--section-space);
+  }
+  .ag-exd__hero {
+    position: relative;
+  }
+  .ag-exd__cover {
+    height: clamp(22rem, 70vh, 46rem);
+  }
+  .ag-exd__intro {
+    position: relative;
+    width: min(var(--content-width), 52rem);
+    margin: clamp(-9rem, -12vw, -4rem) 0 0 max(var(--page-margin), calc((100% - var(--page-width)) / 2 + var(--page-margin)));
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--color-background);
+  }
+  .ag-exd__back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--color-foreground-muted);
+  }
+  .ag-exd__back:hover {
+    color: var(--color-accent);
+  }
+  .ag-exd__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-exd__title {
+    margin-top: 1rem;
+    font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+  }
+  .ag-exd__artists {
+    margin-top: 0.75rem;
+    font-size: 1.1rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-exd__body {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 6rem);
+    width: var(--content-width);
+    margin: clamp(2.5rem, 6vw, 4.5rem) auto 0;
+  }
+  .ag-exd__facts {
+    position: sticky;
+    top: 7rem;
+    align-self: start;
+    display: grid;
+    gap: 1.75rem;
+    justify-items: start;
+  }
+  .ag-exd__facts dl {
+    display: grid;
+    width: 100%;
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-exd__facts dl > div {
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ag-exd__facts dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-exd__facts dd {
+    margin: 0.3rem 0 0;
+  }
+  .ag-exd__facts dd a {
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 0.2em;
+  }
+  .ag-exd__facts dd a:hover {
+    color: var(--color-accent);
+  }
+  .ag-exd__lead {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.3;
+  }
+  .ag-exd__desc {
+    max-width: 44rem;
+    margin-top: 2rem;
+    font-size: 1.02rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-exd__views,
+  .ag-exd__works,
+  .ag-exd__artist-list {
+    width: var(--content-width);
+    margin: var(--section-space) auto 0;
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-exd__section-title {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+  .ag-exd__views-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(85%, 52rem);
+    gap: 1rem;
+    margin: 0;
+    padding: 0 0 1rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .ag-exd__views-row li {
+    aspect-ratio: 3 / 2;
+    scroll-snap-align: start;
+  }
+  .ag-exd__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(2rem, 4vw, 3rem) clamp(1rem, 2.5vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (max-width: 900px) {
+    .ag-exd__intro {
+      width: auto;
+      margin: -3rem var(--page-margin) 0;
+    }
+    .ag-exd__body {
+      grid-template-columns: 1fr;
+    }
+    .ag-exd__facts {
+      position: static;
+    }
+    .ag-exd__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Exhibition",
+  "tag": "section",
+  "settings": [
+    { "type": "url", "id": "back_link", "label": "\"All exhibitions\" link", "info": "Defaults to /pages/exhibitions." },
+    { "type": "url", "id": "visit_link", "label": "\"Plan your visit\" link", "info": "For example your Contact or Visit page." }
+  ]
+}
+{% endschema %}

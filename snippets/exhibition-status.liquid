@@ -1,0 +1,57 @@
+{% doc %}
+  Status badge for an exhibition, worked out from its start_date and end_date:
+  "Now showing", "Coming soon" or "Past". Shows nothing without a start date.
+
+  @param {object} exhibition - An exhibition metaobject
+
+  @example
+  {% render 'exhibition-status', exhibition: exhibition %}
+{% enddoc %}
+
+{%- liquid
+  assign today = 'now' | date: '%Y-%m-%d'
+  assign start = exhibition.start_date.value | date: '%Y-%m-%d'
+  assign end = exhibition.end_date.value | date: '%Y-%m-%d'
+
+  if start == blank
+    assign status = nil
+  elsif start > today
+    assign status = 'upcoming'
+  elsif end != blank and end < today
+    assign status = 'past'
+  else
+    assign status = 'current'
+  endif
+-%}
+{%- if status -%}
+  <span class="ag-status ag-status--{{ status }}">
+    {%- case status -%}
+      {%- when 'upcoming' -%}{{ 'exhibitions.status_upcoming' | t }}
+      {%- when 'past' -%}{{ 'exhibitions.status_past' | t }}
+      {%- else -%}{{ 'exhibitions.status_current' | t }}
+    {%- endcase -%}
+  </span>
+{%- endif -%}
+
+{% stylesheet %}
+  .ag-status {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ag-status--current {
+    border-color: var(--color-foreground);
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  .ag-status--upcoming {
+    color: var(--color-accent);
+  }
+  .ag-status--past {
+    color: var(--color-foreground-muted);
+  }
+{% endstylesheet %}

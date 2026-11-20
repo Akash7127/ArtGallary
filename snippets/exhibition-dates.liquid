@@ -1,0 +1,34 @@
+{% doc %}
+  Readable date range for an exhibition, e.g. "20 Nov – 10 Jan 2027"
+  or "From 4 Mar 2027". Shows a placeholder when no exhibition is given.
+
+  @param {object} [exhibition] - An exhibition metaobject
+
+  @example
+  {% render 'exhibition-dates', exhibition: exhibition %}
+{% enddoc %}
+
+{%- liquid
+  if exhibition == blank
+    echo 'exhibitions.placeholder_dates' | t
+  else
+    assign start = exhibition.start_date.value
+    assign end = exhibition.end_date.value
+    if start != blank
+      assign start_year = start | date: '%Y'
+      if end == blank
+        assign from_date = start | date: '%-d %b %Y'
+        echo 'exhibitions.from_date' | t: date: from_date
+      else
+        assign end_year = end | date: '%Y'
+        if start_year == end_year
+          echo start | date: '%-d %b'
+        else
+          echo start | date: '%-d %b %Y'
+        endif
+        echo ' – '
+        echo end | date: '%-d %b %Y'
+      endif
+    endif
+  endif
+-%}
