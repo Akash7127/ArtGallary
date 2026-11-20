@@ -147,5 +147,29 @@
     "works_by": "Works by {{ artist }}",
     "view_all_works": "View all works",
     "no_works": "New works by this artist are coming soon."
+  },
+  "contact": {
+    "success_title": "Thank you for your message",
+    "success_text": "We've received it and will reply by email, usually within one working day.",
+    "error_intro": "Please check the following:",
+    "topic_label": "What is it about?",
+    "topic_general": "General",
+    "topic_artwork": "An artwork",
+    "topic_artist": "An artist",
+    "topic_commission": "A commission",
+    "topic_advisory": "Art advisory",
+    "topic_press": "Press",
+    "subject": "Regarding",
+    "subject_artwork": "Artwork title",
+    "subject_artist": "Artist name",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message",
+    "send": "Send message",
+    "hours": "Opening hours",
+    "directions": "Get directions",
+    "prefill_artwork": "Hello, I'm interested in \"[name]\". Could you share more details on availability, shipping and viewing?",
+    "prefill_artist": "Hello, I'd like to know more about [name]'s work and any pieces currently available."
   }
 }

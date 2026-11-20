@@ -16,7 +16,14 @@
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign mf = product.metafields.custom
   assign medium = mf.medium.value | default: product.type
-  assign enquire_url = section.settings.enquire_link | default: routes.root_url
+  assign enquire_url = section.settings.enquire_link | default: '/pages/contact'
+  if enquire_url contains '?'
+    assign enquire_url = enquire_url | append: '&'
+  else
+    assign enquire_url = enquire_url | append: '?'
+  endif
+  assign encoded = product.title | url_encode
+  assign enquire_url = enquire_url | append: 'topic=artwork&artwork=' | append: encoded
   assign main_collection = collection | default: product.collections.first
 %}
 
@@ -677,7 +684,7 @@
       "type": "url",
       "id": "enquire_link",
       "label": "Enquire link",
-      "info": "For example your Contact page."
+      "info": "Defaults to /pages/contact. The artwork's title is filled in for the visitor."
     },
     { "type": "checkbox", "id": "show_scale_note", "label": "Show colour note under the image", "default": true },
     { "type": "header", "content": "Assurances" },

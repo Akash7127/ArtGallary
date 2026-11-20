@@ -17,6 +17,14 @@
   endif
   assign vendor_url = name | url_for_vendor
   assign back_url = section.settings.back_link | default: '/pages/artists'
+  assign enquire_url = section.settings.enquire_link | default: '/pages/contact'
+  if enquire_url contains '?'
+    assign enquire_url = enquire_url | append: '&'
+  else
+    assign enquire_url = enquire_url | append: '?'
+  endif
+  assign encoded = name | url_encode
+  assign enquire_url = enquire_url | append: 'topic=artist&artist=' | append: encoded
 %}
 
 <div class="ag-profile full-width">
@@ -66,11 +74,7 @@
 
       <div class="ag-profile__actions">
         <a class="ag-btn" href="#Works-{{ section.id }}">{{ 'artists.see_works' | t }}</a>
-        {% if section.settings.enquire_link != blank %}
-          <a class="ag-btn ag-btn--outline" href="{{ section.settings.enquire_link }}">
-            {{- 'artists.enquire' | t -}}
-          </a>
-        {% endif %}
+        <a class="ag-btn ag-btn--outline" href="{{ enquire_url }}">{{ 'artists.enquire' | t }}</a>
       </div>
     </div>
   </div>
@@ -207,7 +211,7 @@
   "tag": "section",
   "settings": [
     { "type": "url", "id": "back_link", "label": "\"All artists\" link", "info": "Defaults to /pages/artists." },
-    { "type": "url", "id": "enquire_link", "label": "Enquire link", "info": "For example your Contact page." },
+    { "type": "url", "id": "enquire_link", "label": "Enquire link", "info": "Defaults to /pages/contact. The artist's name is filled in for the visitor." },
     { "type": "range", "id": "limit", "min": 4, "max": 24, "step": 4, "label": "Artworks to show", "default": 12 }
   ]
 }

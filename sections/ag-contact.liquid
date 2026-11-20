@@ -1,0 +1,519 @@
+{% comment %}
+  Contact page: enquiry form (sent to the store's contact email by Shopify)
+  beside gallery locations. Each location is a block.
+
+  The form can be prefilled from the address bar, which the Enquire buttons
+  on artwork and artist pages use:
+    /pages/contact?topic=artwork&artwork=Untitled%20(Monsoon)
+    /pages/contact?topic=artist&artist=Meera%20Shah
+{% endcomment %}
+
+<div class="ag-contact full-width">
+  <header class="ag-contact__head">
+    <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+    <h1 class="ag-contact__title">{{ section.settings.heading | default: page.title }}</h1>
+    {% if section.settings.intro != blank %}
+      <div class="ag-contact__intro">{{ section.settings.intro }}</div>
+    {% elsif page.content != blank %}
+      <div class="ag-contact__intro ag-rte">{{ page.content }}</div>
+    {% endif %}
+  </header>
+
+  <div class="ag-contact__grid">
+    <div class="ag-contact__form-wrap">
+      {% form 'contact', id: 'ContactForm', class: 'ag-contact__form' %}
+        {% if form.posted_successfully? %}
+          <div class="ag-contact__success" role="status" tabindex="-1" autofocus>
+            <h2>{{ 'contact.success_title' | t }}</h2>
+            <p>{{ 'contact.success_text' | t }}</p>
+          </div>
+        {% else %}
+          {% if form.errors %}
+            <div class="ag-contact__errors" role="alert">
+              <p>{{ 'contact.error_intro' | t }}</p>
+              {{ form.errors | default_errors }}
+            </div>
+          {% endif %}
+
+          <fieldset class="ag-contact__topics">
+            <legend>{{ 'contact.topic_label' | t }}</legend>
+            <div class="ag-contact__pills">
+              {% liquid
+                assign topics = 'general,artwork,artist,commission,advisory,press' | split: ','
+              %}
+              {% for topic in topics %}
+                {% case topic %}
+                  {% when 'general' %}{% assign topic_label = 'contact.topic_general' | t %}
+                  {% when 'artwork' %}{% assign topic_label = 'contact.topic_artwork' | t %}
+                  {% when 'artist' %}{% assign topic_label = 'contact.topic_artist' | t %}
+                  {% when 'commission' %}{% assign topic_label = 'contact.topic_commission' | t %}
+                  {% when 'advisory' %}{% assign topic_label = 'contact.topic_advisory' | t %}
+                  {% when 'press' %}{% assign topic_label = 'contact.topic_press' | t %}
+                {% endcase %}
+                <input
+                  type="radio"
+                  id="ContactTopic-{{ topic }}"
+                  name="contact[Enquiry about]"
+                  value="{{ topic_label }}"
+                  data-topic="{{ topic }}"
+                  {% if forloop.first %}
+                    checked
+                  {% endif %}
+                >
+                <label for="ContactTopic-{{ topic }}">{{ topic_label }}</label>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <div class="ag-field ag-field--subject" data-subject-field hidden>
+            <label for="ContactSubject" data-subject-label>{{ 'contact.subject' | t }}</label>
+            <input
+              type="text"
+              id="ContactSubject"
+              name="contact[Regarding]"
+              data-subject-input
+            >
+          </div>
+
+          <div class="ag-contact__row">
+            <div class="ag-field">
+              <label for="ContactName">{{ 'contact.name' | t }} <span aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="ContactName"
+                name="contact[Name]"
+                autocomplete="name"
+                required
+              >
+            </div>
+            <div class="ag-field">
+              <label for="ContactEmail">{{ 'contact.email' | t }} <span aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                id="ContactEmail"
+                name="contact[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                value="{{ form.email }}"
+                required
+                {% if form.errors contains 'email' %}
+                  aria-invalid="true"
+                {% endif %}
+              >
+            </div>
+          </div>
+
+          <div class="ag-field">
+            <label for="ContactPhone">{{ 'contact.phone' | t }}</label>
+            <input
+              type="tel"
+              id="ContactPhone"
+              name="contact[Phone]"
+              autocomplete="tel"
+            >
+          </div>
+
+          <div class="ag-field">
+            <label for="ContactMessage">{{ 'contact.message' | t }} <span aria-hidden="true">*</span></label>
+            <textarea
+              id="ContactMessage"
+              name="contact[body]"
+              rows="6"
+              required
+              {% if form.errors contains 'body' %}
+                aria-invalid="true"
+              {% endif %}
+            >{{ form.body }}</textarea>
+          </div>
+
+          <div class="ag-contact__submit">
+            <button type="submit" class="ag-btn">{{ 'contact.send' | t }}</button>
+            {% if section.settings.response_note != blank %}
+              <p>{{ section.settings.response_note }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endform %}
+    </div>
+
+    <aside class="ag-contact__aside">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'location' %}
+            <div class="ag-loc" {{ block.shopify_attributes }}>
+              {% if block.settings.image %}
+                <div class="ag-media ag-loc__media">
+                  {{
+                    block.settings.image
+                    | image_url: width: 900
+                    | image_tag: loading: 'lazy', sizes: '(min-width: 900px) 35vw, 100vw', alt: block.settings.name
+                  }}
+                </div>
+              {% endif %}
+              <h2 class="ag-loc__name">{{ block.settings.name }}</h2>
+              {% if block.settings.address != blank %}
+                <div class="ag-loc__address">{{ block.settings.address }}</div>
+              {% endif %}
+              <dl class="ag-loc__list">
+                {% if block.settings.hours != blank %}
+                  <div>
+                    <dt>{{ 'contact.hours' | t }}</dt>
+                    <dd>{{ block.settings.hours | newline_to_br }}</dd>
+                  </div>
+                {% endif %}
+                {% if block.settings.phone != blank %}
+                  <div>
+                    <dt>{{ 'contact.phone' | t }}</dt>
+                    <dd><a href="tel:{{ block.settings.phone | remove: ' ' }}">{{ block.settings.phone }}</a></dd>
+                  </div>
+                {% endif %}
+                {% if block.settings.email != blank %}
+                  <div>
+                    <dt>{{ 'contact.email' | t }}</dt>
+                    <dd><a href="mailto:{{ block.settings.email }}">{{ block.settings.email }}</a></dd>
+                  </div>
+                {% endif %}
+              </dl>
+              {% if block.settings.map_link != blank %}
+                <a class="ag-link" href="{{ block.settings.map_link }}" target="_blank" rel="noopener">
+                  {{- 'contact.directions' | t }} &nearr;
+                </a>
+              {% endif %}
+            </div>
+
+          {% when 'social' %}
+            <div class="ag-loc ag-loc--social" {{ block.shopify_attributes }}>
+              <h2 class="ag-loc__name">{{ block.settings.heading }}</h2>
+              <ul class="ag-loc__social" role="list">
+                {% if block.settings.instagram != blank %}
+                  <li><a href="{{ block.settings.instagram }}" target="_blank" rel="noopener">Instagram</a></li>
+                {% endif %}
+                {% if block.settings.facebook != blank %}
+                  <li><a href="{{ block.settings.facebook }}" target="_blank" rel="noopener">Facebook</a></li>
+                {% endif %}
+                {% if block.settings.whatsapp != blank %}
+                  <li>
+                    <a href="https://wa.me/{{ block.settings.whatsapp | remove: ' ' | remove: '+' | remove: '-' }}" target="_blank" rel="noopener">WhatsApp</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </aside>
+  </div>
+</div>
+
+<script type="application/json" data-contact-text>
+  {
+    "artwork": {{ 'contact.subject_artwork' | t | json }},
+    "artist": {{ 'contact.subject_artist' | t | json }},
+    "other": {{ 'contact.subject' | t | json }},
+    "artworkMessage": {{ 'contact.prefill_artwork' | t | json }},
+    "artistMessage": {{ 'contact.prefill_artist' | t | json }}
+  }
+</script>
+
+{% javascript %}
+  (function () {
+    var form = document.getElementById('ContactForm');
+    if (!form) return;
+    var textEl = document.querySelector('[data-contact-text]');
+    var text = textEl ? JSON.parse(textEl.textContent) : {};
+    var field = form.querySelector('[data-subject-field]');
+    var label = form.querySelector('[data-subject-label]');
+    var input = form.querySelector('[data-subject-input]');
+    var message = form.querySelector('#ContactMessage');
+
+    function update() {
+      var checked = form.querySelector('input[data-topic]:checked');
+      var topic = checked ? checked.dataset.topic : 'general';
+      var show = topic === 'artwork' || topic === 'artist';
+      if (!field) return;
+      field.hidden = !show && !input.value;
+      label.textContent = text[topic] || text.other;
+    }
+
+    // Prefill from ?topic=artwork&artwork=... or ?topic=artist&artist=...
+    var params = new URLSearchParams(window.location.search);
+    var topic = params.get('topic');
+    var subject = params.get('artwork') || params.get('artist');
+    if (topic) {
+      var radio = form.querySelector('input[data-topic="' + topic + '"]');
+      if (radio) radio.checked = true;
+    }
+    if (subject && input && !input.value) {
+      input.value = subject;
+      if (message && !message.value) {
+        var template = topic === 'artist' ? text.artistMessage : text.artworkMessage;
+        if (template) message.value = template.replace('[name]', subject);
+      }
+    }
+
+    form.addEventListener('change', function (event) {
+      if (event.target.matches('input[data-topic]')) update();
+    });
+    update();
+
+    var success = form.querySelector('.ag-contact__success');
+    if (success) success.focus();
+  })();
+{% endjavascript %}
+
+{% stylesheet %}
+  .ag-contact {
+    width: var(--content-width);
+    margin-inline: auto;
+    padding-bottom: var(--section-space);
+  }
+  .ag-contact__head {
+    max-width: 46rem;
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
+  }
+  .ag-contact__title {
+    margin-top: 1rem;
+    font-size: clamp(2.75rem, 6vw, 5rem);
+  }
+  .ag-contact__intro {
+    margin-top: 1.25rem;
+    font-size: 1.05rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(2.5rem, 6vw, 6rem);
+    align-items: start;
+  }
+  .ag-contact__form {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .ag-contact__topics {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .ag-contact__topics legend,
+  .ag-field label {
+    margin-bottom: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ag-contact__topics .ag-contact__pills input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ag-contact__topics .ag-contact__pills label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .ag-contact__topics .ag-contact__pills input:checked + label {
+    border-color: var(--color-foreground);
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  .ag-contact__topics .ag-contact__pills input:focus-visible + label {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .ag-contact__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .ag-field {
+    display: grid;
+  }
+  .ag-field[hidden] {
+    display: none;
+  }
+  .ag-field label span {
+    color: var(--color-accent);
+  }
+  .ag-field input,
+  .ag-field textarea {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--style-border-radius-inputs);
+    background: color-mix(in srgb, var(--color-background) 60%, white);
+    color: var(--color-foreground);
+    font-size: 1rem;
+  }
+  .ag-field textarea {
+    resize: vertical;
+  }
+  .ag-field input:focus,
+  .ag-field textarea:focus {
+    outline: none;
+    border-color: var(--color-foreground);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
+  .ag-field [aria-invalid='true'] {
+    border-color: var(--color-accent);
+  }
+  .ag-contact__submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+  .ag-contact__submit p {
+    font-size: 0.85rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-contact__errors {
+    padding: 1rem 1.25rem;
+    border-left: 2px solid var(--color-accent);
+    background: var(--color-surface);
+  }
+  .ag-contact__errors ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .ag-contact__success {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--color-surface);
+    border-left: 2px solid var(--color-accent);
+  }
+  .ag-contact__success h2 {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+  }
+  .ag-contact__success p {
+    margin-top: 0.75rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-contact__aside {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .ag-loc {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .ag-loc__media {
+    aspect-ratio: 3 / 2;
+    margin-bottom: 1.25rem;
+  }
+  .ag-loc__name {
+    font-size: 1.75rem;
+  }
+  .ag-loc__address {
+    margin-top: 0.75rem;
+    color: var(--color-foreground-muted);
+  }
+  .ag-loc__list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+  }
+  .ag-loc__list dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+  .ag-loc__list dd {
+    margin: 0.2rem 0 0;
+  }
+  .ag-loc__list a {
+    text-decoration: none;
+  }
+  .ag-loc__list a:hover {
+    color: var(--color-accent);
+  }
+  .ag-loc__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-loc__social a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .ag-loc__social a:hover {
+    border-color: var(--color-foreground);
+  }
+  @media (max-width: 900px) {
+    .ag-contact__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .ag-contact__row {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Contact",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Get in touch" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Contact us" },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction",
+      "info": "Leave empty to use the page content instead.",
+      "default": "<p>Ask about a work, arrange a private viewing, or talk to us about a commission. We're happy to help.</p>"
+    },
+    { "type": "text", "id": "response_note", "label": "Note beside the send button", "default": "We usually reply within one working day." }
+  ],
+  "blocks": [
+    {
+      "type": "location",
+      "name": "Location",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Main gallery" },
+        { "type": "richtext", "id": "address", "label": "Address", "default": "<p>Street address<br>City, State PIN</p>" },
+        { "type": "textarea", "id": "hours", "label": "Opening hours", "default": "Tuesday – Sunday, 11am – 7pm\nClosed on Mondays" },
+        { "type": "text", "id": "phone", "label": "Phone" },
+        { "type": "text", "id": "email", "label": "Email" },
+        { "type": "url", "id": "map_link", "label": "Map link", "info": "Paste a Google Maps link to the gallery." }
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Social links",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Follow us" },
+        { "type": "url", "id": "instagram", "label": "Instagram link" },
+        { "type": "url", "id": "facebook", "label": "Facebook link" },
+        { "type": "text", "id": "whatsapp", "label": "WhatsApp number", "info": "With country code, e.g. +91 98765 43210" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact",
+      "blocks": [{ "type": "location" }, { "type": "social" }]
+    }
+  ],
+  "enabled_on": { "templates": ["page"] }
+}
+{% endschema %}

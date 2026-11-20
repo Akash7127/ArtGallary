@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-contact",
+      "blocks": {
+        "location_1": {
+          "type": "location",
+          "settings": {
+            "name": "Main gallery",
+            "address": "<p>Street address<br>City, State PIN</p>",
+            "hours": "Tuesday – Sunday, 11am – 7pm\nClosed on Mondays"
+          }
+        },
+        "social_1": {
+          "type": "social",
+          "settings": {
+            "heading": "Follow us"
+          }
+        }
+      },
+      "block_order": ["location_1", "social_1"],
+      "settings": {
+        "eyebrow": "Get in touch",
+        "heading": "Contact us",
+        "response_note": "We usually reply within one working day."
+      }
+    }
+  },
+  "order": ["main"]
+}
