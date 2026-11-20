@@ -27,6 +27,25 @@
     </nav>
 
     <div class="ag-header__icons">
+      {% if localization.available_languages.size > 1 %}
+        {% form 'localization', class: 'ag-lang' %}
+          <label class="visually-hidden" for="HeaderLanguage">{{ 'header.language' | t }}</label>
+          <select id="HeaderLanguage" name="language_code" onchange="this.form.submit()">
+            {% for language in localization.available_languages %}
+              <option
+                value="{{ language.iso_code }}"
+                lang="{{ language.iso_code }}"
+                {% if language.iso_code == localization.language.iso_code %}
+                  selected
+                {% endif %}
+              >
+                {{- language.endonym_name | capitalize -}}
+              </option>
+            {% endfor %}
+          </select>
+          <noscript><button type="submit">{{ 'header.change' | t }}</button></noscript>
+        {% endform %}
+      {% endif %}
       <a class="ag-header__icon" href="{{ routes.search_url }}" aria-label="{{ 'search.title' | t }}">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
       </a>
@@ -139,6 +158,19 @@
     font-size: 0.65rem;
     line-height: 1.1rem;
     text-align: center;
+  }
+  .ag-lang select {
+    min-height: 2.75rem;
+    padding: 0 1.6rem 0 0.6rem;
+    border: 0;
+    background: transparent
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%23777' stroke-width='1.5'%3E%3Cpath d='m1 3 4 4 4-4'/%3E%3C/svg%3E")
+      no-repeat right 0.5rem center;
+    appearance: none;
+    color: var(--color-foreground);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
   }
   .ag-header__drawer {
     display: none;

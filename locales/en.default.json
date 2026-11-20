@@ -238,7 +238,9 @@
   },
   "header": {
     "menu": "Menu",
-    "account": "Account"
+    "account": "Account",
+    "language": "Language",
+    "change": "Change"
   },
   "exhibitions": {
     "view": "View exhibition",
