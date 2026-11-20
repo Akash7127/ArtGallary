@@ -1,0 +1,23 @@
+{% doc %}
+  Heading and tabs shared by the account pages.
+
+  @param {string} active - 'overview', 'orders' or 'addresses'
+  @param {string} title - The page heading
+
+  @example
+  {% render 'account-nav', active: 'overview', title: title %}
+{% enddoc %}
+
+<header class="ag-acct__head">
+  <span class="ag-eyebrow">{{ 'customers.account.eyebrow' | t }}</span>
+  <h1 class="ag-acct__title">{{ title }}</h1>
+  <nav class="ag-acct__tabs" aria-label="{{ 'customers.account.menu' | t }}">
+    <a href="{{ routes.account_url }}"{% if active == 'overview' or active == 'orders' %} aria-current="page"{% endif %}>
+      {{- 'customers.account.orders' | t -}}
+    </a>
+    <a href="{{ routes.account_addresses_url }}"{% if active == 'addresses' %} aria-current="page"{% endif %}>
+      {{- 'customers.addresses.title' | t -}}
+    </a>
+    <a href="{{ routes.account_logout_url }}" class="ag-acct__logout">{{ 'customers.account.log_out' | t }}</a>
+  </nav>
+</header>

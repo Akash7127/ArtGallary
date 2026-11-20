@@ -1,0 +1,105 @@
+{% comment %}
+  Account overview (classic customer accounts): order history and
+  account details with the default address.
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-account
+{% endcomment %}
+
+{{ 'account.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  if customer.first_name != blank
+    assign title = 'customers.account.welcome' | t: name: customer.first_name
+  else
+    assign title = 'customers.account.title' | t
+  endif
+%}
+
+<div class="ag-acct full-width">
+  {% render 'account-nav', active: 'overview', title: title %}
+
+  <div class="ag-acct__grid">
+    <section class="ag-acct__main" aria-labelledby="OrderHistory">
+      <h2 id="OrderHistory" class="ag-acct__section-title">{{ 'customers.account.order_history' | t }}</h2>
+
+      {% paginate customer.orders by 10 %}
+        {% if customer.orders.size > 0 %}
+          <table class="ag-orders">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'customers.order.order' | t }}</th>
+                <th scope="col">{{ 'customers.order.date' | t }}</th>
+                <th scope="col">{{ 'customers.order.payment' | t }}</th>
+                <th scope="col">{{ 'customers.order.fulfillment' | t }}</th>
+                <th scope="col" class="ag-orders__num">{{ 'customers.order.total' | t }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in customer.orders %}
+                <tr>
+                  <th scope="row" data-label="{{ 'customers.order.order' | t }}">
+                    <a href="{{ order.customer_url }}" aria-label="{{ 'customers.order.view' | t: name: order.name }}">{{ order.name }}</a>
+                  </th>
+                  <td data-label="{{ 'customers.order.date' | t }}">{{ order.created_at | time_tag: format: 'date' }}</td>
+                  <td data-label="{{ 'customers.order.payment' | t }}">
+                    <span class="ag-pill">{{ order.financial_status_label }}</span>
+                  </td>
+                  <td data-label="{{ 'customers.order.fulfillment' | t }}">
+                    <span class="ag-pill ag-pill--{{ order.fulfillment_status }}">{{ order.fulfillment_status_label }}</span>
+                  </td>
+                  <td data-label="{{ 'customers.order.total' | t }}" class="ag-orders__num">{{ order.total_net_amount | money_with_currency }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% render 'pagination', paginate: paginate %}
+        {% else %}
+          <div class="ag-acct__empty">
+            <p>{{ 'customers.account.no_orders' | t }}</p>
+            <a class="ag-btn" href="{{ routes.all_products_collection_url }}">{{ 'cart.browse_artworks' | t }}</a>
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    </section>
+
+    <aside class="ag-acct__side">
+      <div class="ag-acct__card">
+        <h2 class="ag-acct__card-title">{{ 'customers.account.details' | t }}</h2>
+        <p><strong>{{ customer.name }}</strong></p>
+        <p>{{ customer.email }}</p>
+        {% if customer.phone != blank %}<p>{{ customer.phone }}</p>{% endif %}
+      </div>
+
+      <div class="ag-acct__card">
+        <h2 class="ag-acct__card-title">{{ 'customers.addresses.default' | t }}</h2>
+        {% if customer.default_address %}
+          <address class="ag-acct__address">{{ customer.default_address | format_address }}</address>
+        {% else %}
+          <p class="ag-acct__muted">{{ 'customers.addresses.none' | t }}</p>
+        {% endif %}
+        <a class="ag-link" href="{{ routes.account_addresses_url }}">
+          {{- 'customers.addresses.manage' | t: count: customer.addresses_count }} &rarr;
+        </a>
+      </div>
+
+      {% if section.settings.help_text != blank %}
+        <div class="ag-acct__card ag-acct__card--soft ag-rte">{{ section.settings.help_text }}</div>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Account overview",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "help_text",
+      "label": "Help box",
+      "default": "<p>Questions about an order, framing or delivery? <a href=\"/pages/contact\">Contact us</a> and we'll help.</p>"
+    }
+  ],
+  "enabled_on": { "templates": ["customers/account"] }
+}
+{% endschema %}

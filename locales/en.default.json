@@ -86,6 +86,85 @@
       "submit": "Send reset link",
       "cancel": "Back to sign in",
       "success": "We've emailed you a link to reset your password."
+    },
+    "register": {
+      "title": "Create an account",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "password_hint": "At least 5 characters.",
+      "marketing": "Email me about new works, openings and studio news",
+      "submit": "Create account",
+      "have_account": "Already have an account?"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "text": "Choose a new password for your account.",
+      "password": "New password",
+      "password_confirm": "Confirm new password",
+      "submit": "Save password"
+    },
+    "activate": {
+      "title": "Activate your account",
+      "text": "Create a password to finish setting up your collector account.",
+      "submit": "Activate account",
+      "decline": "Decline invitation"
+    },
+    "account": {
+      "eyebrow": "Collector account",
+      "title": "Your account",
+      "welcome": "Welcome back, {{ name }}",
+      "menu": "Account menu",
+      "orders": "Orders",
+      "log_out": "Sign out",
+      "order_history": "Order history",
+      "no_orders": "You haven't placed any orders yet.",
+      "details": "Account details"
+    },
+    "order": {
+      "title": "Order {{ name }}",
+      "order": "Order",
+      "date": "Date",
+      "payment": "Payment",
+      "fulfillment": "Delivery",
+      "total": "Total",
+      "view": "View order {{ name }}",
+      "placed": "Placed on {{ date }}",
+      "cancelled": "This order was cancelled on {{ date }}",
+      "items": "Items",
+      "quantity": {
+        "one": "{{ count }} piece",
+        "other": "{{ count }} pieces"
+      },
+      "shipped": "Shipped on {{ date }}",
+      "track": "Track parcel",
+      "shipping": "Shipping",
+      "status": "Status",
+      "shipping_address": "Shipping address",
+      "billing_address": "Billing address",
+      "back": "Back to orders"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "default": "Default address",
+      "none": "No address saved yet.",
+      "manage": {
+        "one": "Manage addresses ({{ count }})",
+        "other": "Manage addresses ({{ count }})"
+      },
+      "add": "Add a new address",
+      "save": "Save address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete this address?",
+      "company": "Company",
+      "address1": "Address",
+      "address2": "Apartment, suite, etc.",
+      "city": "City",
+      "zip": "PIN / postal code",
+      "country": "Country",
+      "province": "State / region",
+      "phone": "Phone",
+      "set_default": "Make this my default address"
     }
   },
   "collections": {

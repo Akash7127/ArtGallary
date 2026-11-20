@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-addresses",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

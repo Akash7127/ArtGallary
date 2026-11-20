@@ -1,0 +1,100 @@
+{% comment %}
+  Saved addresses (classic customer accounts): address cards with edit
+  and delete, and a form to add a new one. Country and region lists use
+  Shopify's built-in helper.
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-addresses
+{% endcomment %}
+
+{{ 'account.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+
+{% assign title = 'customers.addresses.title' | t %}
+
+<div class="ag-acct full-width">
+  {% render 'account-nav', active: 'addresses', title: title %}
+
+  {% paginate customer.addresses by 12 %}
+    <div class="ag-addr">
+      <details class="ag-addr__new ag-acct__card"{% if customer.addresses_count == 0 %} open{% endif %}>
+        <summary class="ag-btn">{{ 'customers.addresses.add' | t }}</summary>
+        {% form 'customer_address', customer.new_address, class: 'ag-addr__form' %}
+          <h2 class="ag-acct__card-title">{{ 'customers.addresses.add' | t }}</h2>
+          {% render 'address-form', form: form, id: 'New' %}
+          <div class="ag-addr__actions">
+            <button type="submit" class="ag-btn">{{ 'customers.addresses.save' | t }}</button>
+          </div>
+        {% endform %}
+      </details>
+
+      {% if customer.addresses.size > 0 %}
+        <ul class="ag-addr__list" role="list">
+          {% for address in customer.addresses %}
+            <li class="ag-acct__card ag-addr__card">
+              {% if address == customer.default_address %}
+                <span class="ag-pill ag-pill--fulfilled">{{ 'customers.addresses.default' | t }}</span>
+              {% endif %}
+              <address class="ag-acct__address">{{ address | format_address }}</address>
+
+              <div class="ag-addr__card-actions">
+                <details class="ag-addr__edit">
+                  <summary>{{ 'customers.addresses.edit' | t }}</summary>
+                  {% form 'customer_address', address, class: 'ag-addr__form' %}
+                    {% render 'address-form', form: form, id: address.id %}
+                    <div class="ag-addr__actions">
+                      <button type="submit" class="ag-btn">{{ 'customers.addresses.save' | t }}</button>
+                    </div>
+                  {% endform %}
+                </details>
+
+                <form
+                  method="post"
+                  action="{{ address.url }}"
+                  class="ag-addr__delete"
+                  data-confirm="{{ 'customers.addresses.delete_confirm' | t }}"
+                >
+                  <input type="hidden" name="_method" value="delete">
+                  <button type="submit">{{ 'customers.addresses.delete' | t }}</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% render 'pagination', paginate: paginate %}
+    </div>
+  {% endpaginate %}
+</div>
+
+{% javascript %}
+  function agInitAddresses() {
+    if (window.Shopify && Shopify.CountryProvinceSelector) {
+      document.querySelectorAll('[data-address-country]').forEach(function (select) {
+        var id = select.dataset.addressCountry;
+        new Shopify.CountryProvinceSelector('AddressCountry' + id, 'AddressProvince' + id, {
+          hideElement: 'AddressProvinceContainer' + id,
+        });
+      });
+    }
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+      });
+    });
+  }
+  // Wait for the deferred Shopify helper script before setting up the lists.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', agInitAddresses);
+  } else {
+    agInitAddresses();
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Addresses",
+  "tag": "section",
+  "settings": [],
+  "enabled_on": { "templates": ["customers/addresses"] }
+}
+{% endschema %}

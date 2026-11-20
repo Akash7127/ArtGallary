@@ -9,21 +9,10 @@
   https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-login
 {% endcomment %}
 
+{{ 'account.css' | asset_url | stylesheet_tag }}
+
 <div class="ag-auth full-width">
-  <div class="ag-auth__art ag-media">
-    {% if section.settings.image %}
-      {{
-        section.settings.image
-        | image_url: width: 1600
-        | image_tag: loading: 'eager', sizes: '(min-width: 900px) 50vw, 100vw', alt: ''
-      }}
-    {% else %}
-      {{ 'lifestyle-2' | placeholder_svg_tag }}
-    {% endif %}
-    {% if section.settings.quote != blank %}
-      <blockquote class="ag-auth__quote ag-display">{{ section.settings.quote }}</blockquote>
-    {% endif %}
-  </div>
+  {% render 'auth-art', image: section.settings.image, quote: section.settings.quote %}
 
   <div class="ag-auth__panel">
     {%- comment -%} Recover password {%- endcomment -%}
@@ -132,145 +121,6 @@
   </div>
 </div>
 
-{% stylesheet %}
-  .ag-auth {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    min-height: calc(100svh - 4.75rem);
-  }
-  .ag-auth__art {
-    position: relative;
-    min-height: 18rem;
-  }
-  .ag-auth__art img,
-  .ag-auth__art svg {
-    position: absolute;
-    inset: 0;
-  }
-  .ag-auth__quote {
-    position: absolute;
-    left: clamp(1.25rem, 4vw, 3rem);
-    right: clamp(1.25rem, 4vw, 3rem);
-    bottom: clamp(1.25rem, 4vw, 3rem);
-    margin: 0;
-    padding: 1.25rem 1.5rem;
-    background: var(--color-background);
-    font-size: clamp(1.15rem, 2vw, 1.5rem);
-    font-style: italic;
-    line-height: 1.35;
-  }
-  .ag-auth__panel {
-    display: grid;
-    align-content: center;
-    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 6vw, 5.5rem);
-  }
-  .ag-auth__login,
-  .ag-auth__recover {
-    width: 100%;
-    max-width: 28rem;
-  }
-  .ag-auth__recover {
-    display: none;
-  }
-  .ag-auth__recover:target {
-    display: block;
-  }
-  .ag-auth__recover:target ~ .ag-auth__login {
-    display: none;
-  }
-  .ag-auth__title {
-    margin-top: 1rem;
-    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
-  }
-  .ag-auth__lead {
-    margin-top: 0.85rem;
-    color: var(--color-foreground-muted);
-  }
-  .ag-auth__notice {
-    margin-top: 1.25rem;
-    padding: 0.9rem 1.1rem;
-    border-left: 2px solid var(--color-accent);
-    background: var(--color-surface);
-  }
-  .ag-auth__form {
-    display: grid;
-    gap: 1.25rem;
-    margin-top: 2rem;
-  }
-  .ag-auth__form .ag-btn {
-    width: 100%;
-  }
-  .ag-auth__label-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .ag-auth__label-row a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    margin-top: -0.9rem;
-    font-size: 0.85rem;
-    color: var(--color-foreground-muted);
-    text-underline-offset: 0.2em;
-  }
-  .ag-auth__label-row a:hover,
-  .ag-auth__switch:hover {
-    color: var(--color-accent);
-  }
-  .ag-auth__switch {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.75rem;
-    font-size: 0.9rem;
-    color: var(--color-foreground-muted);
-    text-decoration: none;
-  }
-  .ag-auth__alt {
-    display: grid;
-    gap: 0.75rem;
-    margin-top: 2rem;
-    padding-top: 1.75rem;
-    border-top: 1px solid var(--color-border);
-  }
-  .ag-auth__alt p {
-    color: var(--color-foreground-muted);
-  }
-  .ag-auth__guest {
-    padding: 0 0 0.2rem;
-    border-width: 0 0 1px;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-  }
-  .ag-auth__benefits {
-    margin-top: 2rem;
-    padding: 1.25rem 1.5rem;
-    background: var(--color-surface);
-    font-size: 0.92rem;
-  }
-  .ag-auth__benefits ul {
-    margin: 0;
-    padding-left: 1.1rem;
-  }
-  @media (max-width: 900px) {
-    .ag-auth {
-      grid-template-columns: 1fr;
-      min-height: 0;
-    }
-    .ag-auth__art {
-      min-height: 14rem;
-    }
-    .ag-auth__quote {
-      display: none;
-    }
-    .ag-auth__panel {
-      justify-items: center;
-    }
-  }
-{% endstylesheet %}
 
 {% schema %}
 {

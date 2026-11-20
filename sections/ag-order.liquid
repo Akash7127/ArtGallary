@@ -1,0 +1,133 @@
+{% comment %}
+  Order details (classic customer accounts).
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-order
+{% endcomment %}
+
+{{ 'account.css' | asset_url | stylesheet_tag }}
+
+{% assign title = 'customers.order.title' | t: name: order.name %}
+
+<div class="ag-acct full-width">
+  {% render 'account-nav', active: 'orders', title: title %}
+
+  <p class="ag-acct__muted ag-order__placed">
+    {%- assign placed_on = order.created_at | date: format: 'date' -%}
+    {{ 'customers.order.placed' | t: date: placed_on }}
+  </p>
+
+  {% if order.cancelled %}
+    <div class="ag-form-errors ag-order__notice" role="status">
+      {%- assign cancelled_at = order.cancelled_at | date: format: 'date' -%}
+      {{ 'customers.order.cancelled' | t: date: cancelled_at }}
+      {% if order.cancel_reason_label != blank %}— {{ order.cancel_reason_label }}{% endif %}
+    </div>
+  {% endif %}
+
+  <div class="ag-acct__grid">
+    <section class="ag-acct__main" aria-labelledby="OrderItems">
+      <h2 id="OrderItems" class="ag-acct__section-title">{{ 'customers.order.items' | t }}</h2>
+      <ul class="ag-order__items" role="list">
+        {% for item in order.line_items %}
+          <li class="ag-order__item">
+            <div class="ag-media ag-order__media">
+              {% if item.image %}
+                {{ item.image | image_url: width: 300 | image_tag: loading: 'lazy', sizes: '6rem', alt: item.title }}
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag }}
+              {% endif %}
+            </div>
+            <div>
+              {% if item.vendor != blank %}<p class="ag-order__artist">{{ item.vendor }}</p>{% endif %}
+              <h3 class="ag-order__item-title">
+                {% if item.product.url %}
+                  <a href="{{ item.product.url }}">{{ item.product.title | default: item.title | escape }}</a>
+                {% else %}
+                  {{ item.title | escape }}
+                {% endif %}
+              </h3>
+              {% unless item.variant.title == 'Default Title' or item.variant.title == blank %}
+                <p class="ag-acct__muted">{{ item.variant.title }}</p>
+              {% endunless %}
+              <p class="ag-acct__muted">
+                {{ 'customers.order.quantity' | t: count: item.quantity }} · {{ item.final_price | money }}
+              </p>
+              {% if item.fulfillment %}
+                <p class="ag-order__track">
+                  {%- assign shipped_on = item.fulfillment.created_at | date: format: 'date' -%}
+                  {{ 'customers.order.shipped' | t: date: shipped_on }}
+                  {% if item.fulfillment.tracking_url %}
+                    · <a href="{{ item.fulfillment.tracking_url }}" target="_blank" rel="noopener">
+                      {{- 'customers.order.track' | t -}}
+                    </a>
+                  {% endif %}
+                </p>
+              {% endif %}
+            </div>
+            <p class="ag-order__item-total">{{ item.final_line_price | money }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <dl class="ag-order__totals">
+        <div>
+          <dt>{{ 'cart.subtotal' | t }}</dt>
+          <dd>{{ order.line_items_subtotal_price | money }}</dd>
+        </div>
+        {% for discount in order.cart_level_discount_applications %}
+          <div class="ag-order__discount">
+            <dt>{{ discount.title }}</dt>
+            <dd>−{{ discount.total_allocated_amount | money }}</dd>
+          </div>
+        {% endfor %}
+        {% for shipping_method in order.shipping_methods %}
+          <div>
+            <dt>{{ 'customers.order.shipping' | t }} ({{ shipping_method.title }})</dt>
+            <dd>{{ shipping_method.price | money }}</dd>
+          </div>
+        {% endfor %}
+        {% for tax_line in order.tax_lines %}
+          <div>
+            <dt>{{ tax_line.title }} ({{ tax_line.rate_percentage }}%)</dt>
+            <dd>{{ tax_line.price | money }}</dd>
+          </div>
+        {% endfor %}
+        <div class="ag-order__grand">
+          <dt>{{ 'cart.total' | t }}</dt>
+          <dd>{{ order.total_net_amount | money_with_currency }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <aside class="ag-acct__side">
+      <div class="ag-acct__card">
+        <h2 class="ag-acct__card-title">{{ 'customers.order.status' | t }}</h2>
+        <p>
+          <span class="ag-pill">{{ order.financial_status_label }}</span>
+          <span class="ag-pill ag-pill--{{ order.fulfillment_status }}">{{ order.fulfillment_status_label }}</span>
+        </p>
+      </div>
+      {% if order.shipping_address %}
+        <div class="ag-acct__card">
+          <h2 class="ag-acct__card-title">{{ 'customers.order.shipping_address' | t }}</h2>
+          <address class="ag-acct__address">{{ order.shipping_address | format_address }}</address>
+        </div>
+      {% endif %}
+      {% if order.billing_address %}
+        <div class="ag-acct__card">
+          <h2 class="ag-acct__card-title">{{ 'customers.order.billing_address' | t }}</h2>
+          <address class="ag-acct__address">{{ order.billing_address | format_address }}</address>
+        </div>
+      {% endif %}
+      <a class="ag-link" href="{{ routes.account_url }}">&larr; {{ 'customers.order.back' | t }}</a>
+    </aside>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Order",
+  "tag": "section",
+  "settings": [],
+  "enabled_on": { "templates": ["customers/order"] }
+}
+{% endschema %}

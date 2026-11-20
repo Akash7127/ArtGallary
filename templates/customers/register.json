@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-register",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,97 @@
+{% comment %}
+  Create account page (classic customer accounts).
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/customers-register
+{% endcomment %}
+
+{{ 'account.css' | asset_url | stylesheet_tag }}
+
+<div class="ag-auth full-width">
+  {% render 'auth-art', image: section.settings.image, quote: section.settings.quote %}
+
+  <div class="ag-auth__panel">
+    <div class="ag-auth__login">
+      <span class="ag-eyebrow">{{ section.settings.eyebrow }}</span>
+      <h1 class="ag-auth__title">{{ 'customers.register.title' | t }}</h1>
+      {% if section.settings.intro != blank %}
+        <div class="ag-auth__lead">{{ section.settings.intro }}</div>
+      {% endif %}
+
+      {% form 'create_customer', novalidate: 'novalidate', class: 'ag-auth__form' %}
+        {% if form.errors %}
+          <div class="ag-form-errors" role="alert">{{ form.errors | default_errors }}</div>
+        {% endif %}
+        <div class="ag-form-row">
+          <div class="ag-field">
+            <label for="RegisterFirstName">{{ 'customers.register.first_name' | t }}</label>
+            <input type="text" id="RegisterFirstName" name="customer[first_name]" autocomplete="given-name" value="{{ form.first_name }}">
+          </div>
+          <div class="ag-field">
+            <label for="RegisterLastName">{{ 'customers.register.last_name' | t }}</label>
+            <input type="text" id="RegisterLastName" name="customer[last_name]" autocomplete="family-name" value="{{ form.last_name }}">
+          </div>
+        </div>
+        <div class="ag-field">
+          <label for="RegisterEmail">{{ 'customers.login.email' | t }} <span aria-hidden="true">*</span></label>
+          <input
+            type="email"
+            id="RegisterEmail"
+            name="customer[email]"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            value="{{ form.email }}"
+            required
+            {% if form.errors contains 'email' %}
+              aria-invalid="true"
+            {% endif %}
+          >
+        </div>
+        <div class="ag-field">
+          <label for="RegisterPassword">{{ 'customers.login.password' | t }} <span aria-hidden="true">*</span></label>
+          <input
+            type="password"
+            id="RegisterPassword"
+            name="customer[password]"
+            autocomplete="new-password"
+            minlength="5"
+            aria-describedby="RegisterPasswordHint"
+            required
+            {% if form.errors contains 'password' %}
+              aria-invalid="true"
+            {% endif %}
+          >
+          <small id="RegisterPasswordHint" class="ag-auth__hint">{{ 'customers.register.password_hint' | t }}</small>
+        </div>
+        <label class="ag-auth__check">
+          <input type="checkbox" name="customer[accepts_marketing]" value="true" checked>
+          <span>{{ 'customers.register.marketing' | t }}</span>
+        </label>
+        <button type="submit" class="ag-btn">{{ 'customers.register.submit' | t }}</button>
+      {% endform %}
+
+      <div class="ag-auth__alt">
+        <p>{{ 'customers.register.have_account' | t }}</p>
+        <a class="ag-btn ag-btn--outline" href="{{ routes.account_login_url }}">{{ 'customers.login.submit' | t }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Create account",
+  "tag": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Artwork image" },
+    { "type": "text", "id": "quote", "label": "Quote over the image", "default": "Be first to see new work from the artists you love." },
+    { "type": "text", "id": "eyebrow", "label": "Small label", "default": "Collector account" },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "<p>Save your details, follow your orders and get early access to new works.</p>"
+    }
+  ],
+  "enabled_on": { "templates": ["customers/register"] }
+}
+{% endschema %}

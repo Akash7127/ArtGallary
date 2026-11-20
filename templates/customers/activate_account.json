@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-reset-password",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}

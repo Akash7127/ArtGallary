@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ag-account",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
