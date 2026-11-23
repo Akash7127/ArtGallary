@@ -104,7 +104,7 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Artists: Ira Vadera, Kabir Solanki, Tara Bhatt
 - Start date: 2026-11-06 · End date: 2027-01-10
 - Location: Main gallery
-- Opening: Thursday 6 November, 6–9 pm
+- Opening: Friday 6 November, 6–9 pm
 - Cover: `ag-sample-02`
 - Summary: Three painters, one warm palette. Earth and Ember brings together new canvases and drawings that look at heat, dusk and the colours of dry land.
 - Description: The works in this exhibition were made over the past year in three very different places: a studio in Ahmedabad, a courtyard in Bhuj and a small flat in Mumbai. What joins them is colour. Rust, ochre, saffron and deep brown run through every room, along with the cooler teal of evening. Together they make a quiet, glowing show about land and light.
@@ -142,6 +142,7 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Location: Main gallery
 - Cover: `ag-sample-06`
 - Summary: Ink, gouache and pen on paper: small, intimate works that respond to rain, wind and changing light.
+- Description: Paper Weather brought together small works on paper by Tara Bhatt, Anaya Rathod and Ira Vadera. Drifting ink dots, hand-painted rings and long pen lines hung side by side, three very different ways of recording rain, wind and the changing light of a single season.
 - Artworks: Pollen Drift, Sun Rings, Tide Lines
 
 ### First Light  *(past)*
@@ -152,4 +153,5 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Location: Main gallery
 - Cover: `ag-sample-08`
 - Summary: Kabir Solanki's first solo show with the gallery: doorways, courtyards and the early-morning light of Kutch.
+- Description: First Light was Kabir Solanki's first solo exhibition with the gallery. The paintings came from early-morning walks through the old towns of Kutch, where doorways, arches and courtyards glow before the heat of the day. Each work strips a familiar place down to a few warm shapes and a single quiet colour.
 - Artworks: Three Doorways, Dusk over Kutch
