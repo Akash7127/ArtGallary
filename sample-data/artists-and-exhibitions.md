@@ -120,6 +120,7 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Cover: `ag-sample-10`
 - Summary: New paintings from the white desert, where the ground is salt and the sky never seems to end.
 - Description: Rohan Ves has returned to the salt flats every winter for a decade. This online exhibition shows his newest night paintings alongside the strict grid works that he makes in between trips, two sides of the same search for order and space.
+- Installation views: `ag-sample-04`, `ag-sample-10`
 - Artworks: Night at Rann, Kolam Grid
 
 ### Thread and Ground  *(coming soon)*
@@ -132,6 +133,7 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Cover: `ag-sample-05`
 - Summary: Two artists who build images slowly, by hand: one with thread, the other with cut and painted paper.
 - Description: Thread and Ground pairs Meher Joshi's hand-woven textiles and prints with Anaya Rathod's gouaches and collages. Both work through repetition and patience, and both draw on plants, gardens and natural colour.
+- Installation views: `ag-sample-11`, `ag-sample-09`
 - Artworks: Loom Song, Seed Spiral, Sun Rings, Garden Forms
 
 ### Paper Weather  *(past)*
@@ -143,6 +145,7 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Cover: `ag-sample-06`
 - Summary: Ink, gouache and pen on paper: small, intimate works that respond to rain, wind and changing light.
 - Description: Paper Weather brought together small works on paper by Tara Bhatt, Anaya Rathod and Ira Vadera. Drifting ink dots, hand-painted rings and long pen lines hung side by side, three very different ways of recording rain, wind and the changing light of a single season.
+- Installation views: `ag-sample-03`, `ag-sample-07`
 - Artworks: Pollen Drift, Sun Rings, Tide Lines
 
 ### First Light  *(past)*
@@ -154,4 +157,5 @@ import. Pick them with "Select existing" in the file picker; the file names star
 - Cover: `ag-sample-08`
 - Summary: Kabir Solanki's first solo show with the gallery: doorways, courtyards and the early-morning light of Kutch.
 - Description: First Light was Kabir Solanki's first solo exhibition with the gallery. The paintings came from early-morning walks through the old towns of Kutch, where doorways, arches and courtyards glow before the heat of the day. Each work strips a familiar place down to a few warm shapes and a single quiet colour.
+- Installation views: `ag-sample-08`, `ag-sample-02`
 - Artworks: Three Doorways, Dusk over Kutch
